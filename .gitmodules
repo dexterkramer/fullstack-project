@@ -1,9 +1,6 @@
 [submodule "apis/my-api"]
 	path = apis/my-api
 	url = https://github.com/dexterkramer/my-api.git
-[submodule "neo4j-docker"]
-	path = neo4j-docker
-	url = https://github.com/dexterkramer/neo4j-docker.git
 [submodule "clients/my-front"]
 	path = clients/my-front
 	url = https://github.com/dexterkramer/my-front.git
