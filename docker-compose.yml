@@ -50,7 +50,7 @@ services:
   neo4j-seeder:
     build:
       dockerfile: Dockerfile
-      context: ./neo4j/seeder-container
+      context: ./datas/${NEO4J_PATH}/seeder-container
     container_name: neo4j-seeder
     environment:
       NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
@@ -67,7 +67,7 @@ services:
   neo4j:
     build:
       dockerfile: Dockerfile
-      context: ./neo4j
+      context: ./datas/${NEO4J_PATH}
     hostname: ${NEO4J_HOSTNAME}
     container_name: neo4j
     restart: always
@@ -89,10 +89,10 @@ services:
       - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
       - "7687:${NEO4J_BOLT_PORT}"
     volumes:
-      - ./neo4j/neo4j-runtime/data:/data"
-      - ./neo4j/neo4j-runtime/logs:/logs"
-      - ./neo4j/neo4j-runtime/import:/import"
-      - ./neo4j/neo4j-runtime/plugins:/plugins"
+      - ./datas/${NEO4J_PATH}/neo4j-runtime/data:/data"
+      - ./datas/${NEO4J_PATH}/neo4j-runtime/logs:/logs"
+      - ./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
+      - ./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
     networks:
       - neo4j_net
     healthcheck:
