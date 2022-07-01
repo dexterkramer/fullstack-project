@@ -1,0 +1,239 @@
+version: "3.8"
+services:
+
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: ./apis/${API_PATH}
+      target: development
+      args:
+        - NODE_ENV=${NODE_ENV}
+    container_name: ${API_CONTAINER_NAME}
+    volumes:
+      - ./apis/${API_PATH}:/opt/node_app/app
+      - ./opt/node_app/app/node_modules
+    command: ../node_modules/.bin/nest start --watch
+    environment: 
+      NODE_ENV: ${NODE_ENV}
+      JWT_SECRET: 1hard_to_guess_secret7890a
+      PORT: ${NEST_SERVER_PORT}
+    ports:
+      - 8080:${NEST_SERVER_PORT}
+      # debugging port
+      - 9229:9229
+    networks:
+      - neo4j_net
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+  client:
+    build:
+      dockerfile: Dockerfile
+      context: ./clients/${CLIENT_PATH}
+      args:
+        - NODE_ENV=${NODE_ENV}
+    container_name: ${CLIENT_CONTAINER_NAME}
+    volumes:
+      - "./clients/${CLIENT_PATH}:/opt/node_app/app"
+      - "./opt/node_app/app/node_modules"
+    command: ../node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000
+    ports:
+      - 4200:4200
+      # debugging port
+      - 49153:49153
+
+#############################
+######### neo4j #############
+#############################
+
+  neo4j-seeder:
+    build:
+      dockerfile: Dockerfile
+      context: ./neo4j/seeder-container
+    container_name: neo4j-seeder
+    environment:
+      NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
+      NEO4J_USERNAME: ${NEO4J_USERNAME}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_PORT: ${NEO4J_PORT}
+      NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - neo4j_net
+  
+  neo4j:
+    build:
+      dockerfile: Dockerfile
+      context: ./neo4j
+    hostname: ${NEO4J_HOSTNAME}
+    container_name: neo4j
+    restart: always
+    environment:
+      NEO4J_AUTH: ${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+      NEO4J_dbms_memory_heap_max__size: ${NEO4J_MEM_HEAP}
+      NEO4J_dbms_connector_bolt_advertised__address: "0.0.0.0:${NEO4J_BOLT_PORT}"
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+      NEO4J_dbms.shell.enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_dbms.default_listen_address: 0.0.0.0
+      # NEO4J_apoc_initializer_cypher: "CALL apoc.cypher.runFile('file:///apoc.cypher_query.cypher')"
+      # NEO4JLABS_PLUGINS: '["apoc"]'
+      # NEO4J_dbms_logs_debug_level: DEBUG
+      # NEO4J_AUTH: none
+      # NEO4J_kafka_bootstrap_servers: broker:9093
+      # NEO4J_dbms.security.procedures.whitelist: apoc.coll.*,apoc.load.*,apoc.cypher.*
+    ports:
+      - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
+      - "7687:${NEO4J_BOLT_PORT}"
+    volumes:
+      - ./neo4j/neo4j-runtime/data:/data"
+      - ./neo4j/neo4j-runtime/logs:/logs"
+      - ./neo4j/neo4j-runtime/import:/import"
+      - ./neo4j/neo4j-runtime/plugins:/plugins"
+    networks:
+      - neo4j_net
+    healthcheck:
+      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count" ]
+      interval: 3s
+      timeout: 3s
+      retries: 50
+
+#############################
+######### /neo4j ############
+#############################
+
+#############################
+####### confluentinc ########
+#############################
+#   zookeeper:
+#     image: confluentinc/cp-zookeeper
+#     hostname: zookeeper
+#     container_name: zookeeper
+#     ports:
+#       - "2181:2181"
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#       ZOOKEEPER_TICK_TIME: 2000
+#     logging:
+#       driver: none
+
+#   broker:
+#     image: confluentinc/cp-enterprise-kafka
+#     hostname: broker
+#     container_name: broker
+#     depends_on:
+#       - zookeeper
+#     ports:
+#       - "9092:9092"
+#     expose:
+#     - "9093"
+#     environment:
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9093,OUTSIDE://localhost:9092
+#       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+#       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+#       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9093
+
+#       # workaround if we change to a custom name the schema_registry fails to start
+#       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+#       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#       CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+#       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+#       CONFLUENT_METRICS_ENABLE: 'true'
+#       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+#     logging:
+#       driver: none
+
+#   schema_registry:
+#     image: confluentinc/cp-schema-registry
+#     hostname: schema_registry
+#     container_name: schema_registry
+#     depends_on:
+#       - zookeeper
+#       - broker
+#     ports:
+#       - "8081:8081"
+#     environment:
+#       SCHEMA_REGISTRY_HOST_NAME: schema_registry
+#       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+#     logging:
+#       driver: none
+  
+#   connect:
+#     image: confluentinc/cp-kafka-connect
+#     hostname: connect
+#     container_name: connect
+#     depends_on:
+#       - zookeeper
+#       - broker
+#       - schema_registry
+#     ports:
+#       - "8083:8083"
+#     volumes:
+#       - ./plugins:/tmp/connect-plugins
+#     environment:
+#       CONNECT_BOOTSTRAP_SERVERS: 'broker:9093'
+#       CONNECT_REST_ADVERTISED_HOST_NAME: connect
+#       CONNECT_REST_PORT: 8083
+#       CONNECT_GROUP_ID: compose-connect-group
+#       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+#       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+#       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+#       CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+#       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+#       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+#       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+#       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+#       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
+#       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+#       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
+#       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#       CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+#       CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
+#       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
+#     command:
+# #      - bash
+# #      - -c
+# #      - |
+# #        confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:1.0.6
+#         /etc/confluent/docker/run
+#     logging:
+#       driver: none
+
+#   control-center:
+#     image: confluentinc/cp-enterprise-control-center
+#     hostname: control-center
+#     container_name: control-center
+#     depends_on:
+#       - zookeeper
+#       - broker
+#       - schema_registry
+#       - connect
+#     ports:
+#       - "9021:9021"
+#     environment:
+#       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:9093'
+#       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+#       CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
+#       CONTROL_CENTER_REPLICATION_FACTOR: 1
+#       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+#       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+#       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+#       PORT: 9021
+#     logging:
+#       driver: none
+#############################
+###### /confluentinc ########
+#############################
+
+networks:
+  neo4j_net:
+    driver: bridge
