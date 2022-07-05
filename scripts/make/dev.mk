@@ -12,6 +12,11 @@ start:build ## Build and start docker containers
 dev: 
 	docker-compose up
 
+destroy:
+	docker-compose stop
+	docker-compose down -v --remove-orphans
+	docker system prune -a --volumes -f
+
 destroy-all:
 	docker-compose stop
 	docker-compose down -v --remove-orphans
