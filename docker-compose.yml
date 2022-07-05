@@ -30,27 +30,6 @@ services:
       neo4j:
         condition: service_healthy
 
-  # client:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./clients/${CLIENT_PATH}
-  #     args:
-  #       - NODE_ENV=${NODE_ENV}
-  #   container_name: ${CLIENT_CONTAINER_NAME}
-  #   volumes:
-  #     - "./clients/${CLIENT_PATH}:/opt/node_app/app"
-  #     - "./opt/node_app/app/node_modules"
-  #     # - "./clients/${CLIENT_PATH}/docker:/opt/node_app/app"
-  #     # - "./opt/node_app/app/package-lock.json"
-  #     # - "./clients/${CLIENT_PATH}/docker/package-lock-fake.json:/opt/node_app/app/package-lock.json"
-  #     # - "notused:/opt/node_app/app/package-lock.json"
-  #   command: sh -c "../node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
-  #   # command: ["tail", "-f", "/dev/null"]
-  #   ports:
-  #     - 4200:4200
-  #     # debugging port
-  #     - 49153:49153
-
   client:
     build:
       dockerfile: Dockerfile
