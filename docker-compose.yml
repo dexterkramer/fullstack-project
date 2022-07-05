@@ -10,9 +10,12 @@ services:
         - NODE_ENV=${NODE_ENV}
     container_name: ${API_CONTAINER_NAME}
     volumes:
-      - ./apis/${API_PATH}:/opt/node_app/app
-      - ./opt/node_app/app/node_modules
-    command: ../node_modules/.bin/nest start --watch
+      - ./apis/${API_PATH}/src:/opt/node_app/app/src
+      - ./apis/${API_PATH}/test:/opt/node_app/app/test
+      - ./apis/${API_PATH}/nest-cli.json:/opt/node_app/app/nest-cli.json
+      - "./apis/${API_PATH}/tsconfig.json:/opt/node_app/app/tsconfig.json"
+      - "./apis/${API_PATH}/tsconfig.build.json:/opt/node_app/app/tsconfig.build.json"
+    command: ./node_modules/.bin/nest start --watch
     environment: 
       NODE_ENV: ${NODE_ENV}
       JWT_SECRET: 1hard_to_guess_secret7890a
@@ -27,6 +30,27 @@ services:
       neo4j:
         condition: service_healthy
 
+  # client:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./clients/${CLIENT_PATH}
+  #     args:
+  #       - NODE_ENV=${NODE_ENV}
+  #   container_name: ${CLIENT_CONTAINER_NAME}
+  #   volumes:
+  #     - "./clients/${CLIENT_PATH}:/opt/node_app/app"
+  #     - "./opt/node_app/app/node_modules"
+  #     # - "./clients/${CLIENT_PATH}/docker:/opt/node_app/app"
+  #     # - "./opt/node_app/app/package-lock.json"
+  #     # - "./clients/${CLIENT_PATH}/docker/package-lock-fake.json:/opt/node_app/app/package-lock.json"
+  #     # - "notused:/opt/node_app/app/package-lock.json"
+  #   command: sh -c "../node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
+  #   # command: ["tail", "-f", "/dev/null"]
+  #   ports:
+  #     - 4200:4200
+  #     # debugging port
+  #     - 49153:49153
+
   client:
     build:
       dockerfile: Dockerfile
@@ -35,9 +59,13 @@ services:
         - NODE_ENV=${NODE_ENV}
     container_name: ${CLIENT_CONTAINER_NAME}
     volumes:
-      - "./clients/${CLIENT_PATH}:/opt/node_app/app"
-      - "./opt/node_app/app/node_modules"
-    command: ../node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000
+      - "./clients/${CLIENT_PATH}/src:/opt/node_app/app/src"
+      - "./clients/${CLIENT_PATH}/angular.json:/opt/node_app/app/angular.json"
+      - "./clients/${CLIENT_PATH}/karma.conf.js:/opt/node_app/app/karma.conf.js"
+      - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/node_app/app/tsconfig.app.json"
+      - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/node_app/app/tsconfig.spec.json"
+      - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/node_app/app/tsconfig.json"
+    command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
     ports:
       - 4200:4200
       # debugging port
@@ -233,6 +261,9 @@ services:
 #############################
 ###### /confluentinc ########
 #############################
+
+# volumes:
+#   notused:
 
 networks:
   neo4j_net:
