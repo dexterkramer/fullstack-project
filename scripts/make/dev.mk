@@ -17,11 +17,6 @@ destroy:
 	docker-compose down -v --remove-orphans
 	docker system prune -a --volumes -f
 
-destroy-all:
-	docker-compose stop
-	docker-compose down -v --remove-orphans
-	docker system prune -a --volumes -f
-
 stop: ## Stop docker containers
 	docker-compose stop
 

@@ -64,9 +64,6 @@ services:
       NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
     volumes:
       - "./datas/${NEO4J_PATH}/neo4j-runtime/db/flag:/flag"
-    depends_on:
-      neo4j:
-        condition: service_healthy
     networks:
       - neo4j_net
   
@@ -101,12 +98,6 @@ services:
       - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
     networks:
       - neo4j_net
-    healthcheck:
-      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
-      interval: 3s
-      timeout: 3s
-      retries: 50
-      start_period: 20s
 
 #############################
 ######### /neo4j ############
