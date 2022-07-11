@@ -10,9 +10,9 @@ services:
         - NODE_ENV=${NODE_ENV}
     container_name: ${API_CONTAINER_NAME}
     volumes:
-      - ./apis/${API_PATH}/src:/opt/app/src
-      - ./apis/${API_PATH}/test:/opt/app/test
-      - ./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json
+      - "./apis/${API_PATH}/src:/opt/app/src"
+      - "./apis/${API_PATH}/test:/opt/app/test"
+      - "./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json"
       - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
       - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
     command: ./node_modules/.bin/nest start --watch
