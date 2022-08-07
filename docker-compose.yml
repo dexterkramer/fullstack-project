@@ -5,125 +5,125 @@ services:
 ######### Apis #############
 #############################
 
-  api:
-    build:
-      dockerfile: Dockerfile
-      context: ./apis/${API_PATH}
-      target: development
-      args:
-        - NODE_ENV=${NODE_ENV}
-    container_name: ${API_CONTAINER_NAME}
-    volumes:
-      - "./apis/${API_PATH}/src:/opt/app/src"
-      - "./apis/${API_PATH}/test:/opt/app/test"
-      - "./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json"
-      - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
-      - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
-      - "./apis/${API_PATH}/.env:/opt/app/.env"
-    command: ./node_modules/.bin/nest start --watch
-    environment: 
-      NODE_ENV: ${NODE_ENV}
-      JWT_SECRET: 1hard_to_guess_secret7890a
-      PORT: ${NEST_SERVER_PORT}
-    ports:
-      - 8080:${NEST_SERVER_PORT}
-      # debugging port
-      - 9229:9229
-    networks:
-      - intranet
-    depends_on:
-      neo4j:
-        condition: service_healthy
+#   api:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./apis/${API_PATH}
+#       target: development
+#       args:
+#         - NODE_ENV=${NODE_ENV}
+#     container_name: ${API_CONTAINER_NAME}
+#     volumes:
+#       - "./apis/${API_PATH}/src:/opt/app/src"
+#       - "./apis/${API_PATH}/test:/opt/app/test"
+#       - "./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json"
+#       - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
+#       - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
+#       - "./apis/${API_PATH}/.env:/opt/app/.env"
+#     command: ./node_modules/.bin/nest start --watch
+#     environment: 
+#       NODE_ENV: ${NODE_ENV}
+#       JWT_SECRET: 1hard_to_guess_secret7890a
+#       PORT: ${NEST_SERVER_PORT}
+#     ports:
+#       - 8080:${NEST_SERVER_PORT}
+#       # debugging port
+#       - 9229:9229
+#     networks:
+#       - intranet
+#     depends_on:
+#       neo4j:
+#         condition: service_healthy
 
-#############################
-######### Clients ###########
-#############################
+# #############################
+# ######### Clients ###########
+# #############################
 
-  client:
-    build:
-      dockerfile: Dockerfile
-      context: ./clients/${CLIENT_PATH}
-      args:
-        - NODE_ENV=${NODE_ENV}
-    container_name: ${CLIENT_CONTAINER_NAME}
-    volumes:
-      - "./clients/${CLIENT_PATH}/src:/opt/app/src"
-      - "./clients/${CLIENT_PATH}/angular.json:/opt/app/angular.json"
-      - "./clients/${CLIENT_PATH}/karma.conf.js:/opt/app/karma.conf.js"
-      - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/app/tsconfig.app.json"
-      - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/app/tsconfig.spec.json"
-      - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/app/tsconfig.json"
-    command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
-    ports:
-      - 4200:4200
-      # debugging port
-      # - 49153:49153
+#   client:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./clients/${CLIENT_PATH}
+#       args:
+#         - NODE_ENV=${NODE_ENV}
+#     container_name: ${CLIENT_CONTAINER_NAME}
+#     volumes:
+#       - "./clients/${CLIENT_PATH}/src:/opt/app/src"
+#       - "./clients/${CLIENT_PATH}/angular.json:/opt/app/angular.json"
+#       - "./clients/${CLIENT_PATH}/karma.conf.js:/opt/app/karma.conf.js"
+#       - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/app/tsconfig.app.json"
+#       - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/app/tsconfig.spec.json"
+#       - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/app/tsconfig.json"
+#     command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
+#     ports:
+#       - 4200:4200
+#       # debugging port
+#       # - 49153:49153
 
-#############################
-######### neo4j #############
-#############################
+# #############################
+# ######### neo4j #############
+# #############################
 
-  neo4j-seeder:
-    build:
-      dockerfile: Dockerfile
-      context: ./datas/${NEO4J_PATH}/seeder-container
-    container_name: neo4j-seeder
-    environment:
-      NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
-      NEO4J_USERNAME: ${NEO4J_USERNAME}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-      NEO4J_PORT: ${NEO4J_PORT}
-      NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
-    volumes:
-      - "./datas/${NEO4J_PATH}/seeder-container/to-import:/import"
-    networks:
-      - intranet
-    depends_on:
-      neo4j:
-        condition: service_healthy
-  # --------------------------------------------------------------------------------
-  neo4j:
-    build:
-      dockerfile: Dockerfile
-      context: ./datas/${NEO4J_PATH}
-    hostname: ${NEO4J_HOSTNAME}
-    container_name: neo4j
-    restart: always
-    environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME}/${NEO4J_PASSWORD}
-      NEO4J_dbms_memory_heap_max__size: ${NEO4J_MEM_HEAP}
-      NEO4J_dbms_connector_bolt_advertised__address: "0.0.0.0:${NEO4J_BOLT_PORT}"
-      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
-      NEO4J_dbms.shell.enabled: "true"
-      NEO4J_apoc_import_file_enabled: "true"
-      NEO4J_dbms.default_listen_address: 0.0.0.0
-      NEO4J_dbms_default__database: ${NEO4J_DATABASE}
-      # NEO4J_apoc_initializer_cypher: "CALL apoc.cypher.runFile('file:///apoc.cypher_query.cypher')"
-      # NEO4JLABS_PLUGINS: '["apoc"]'
-      # NEO4J_dbms_logs_debug_level: DEBUG
-      # NEO4J_AUTH: none
-      # NEO4J_kafka_bootstrap_servers: broker:9093
-      # NEO4J_dbms.security.procedures.whitelist: apoc.coll.*,apoc.load.*,apoc.cypher.*
-    ports:
-      - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
-      - "7687:${NEO4J_BOLT_PORT}"
-    volumes:
-      - "./datas/${NEO4J_PATH}/neo4j-runtime/db/data:/data"
-      - "./datas/${NEO4J_PATH}/neo4j-runtime/logs:/logs"
-      - "./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
-      - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
-    networks:
-      - intranet
-    healthcheck:
-      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
-      interval: 3s
-      timeout: 3s
-      retries: 50
-      start_period: 40s
+#   neo4j-seeder:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./datas/${NEO4J_PATH}/seeder-container
+#     container_name: neo4j-seeder
+#     environment:
+#       NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
+#       NEO4J_USERNAME: ${NEO4J_USERNAME}
+#       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+#       NEO4J_PORT: ${NEO4J_PORT}
+#       NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
+#     volumes:
+#       - "./datas/${NEO4J_PATH}/seeder-container/to-import:/import"
+#     networks:
+#       - intranet
+#     depends_on:
+#       neo4j:
+#         condition: service_healthy
+#   # --------------------------------------------------------------------------------
+#   neo4j:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./datas/${NEO4J_PATH}
+#     hostname: ${NEO4J_HOSTNAME}
+#     container_name: neo4j
+#     restart: always
+#     environment:
+#       NEO4J_AUTH: ${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+#       NEO4J_dbms_memory_heap_max__size: ${NEO4J_MEM_HEAP}
+#       NEO4J_dbms_connector_bolt_advertised__address: "0.0.0.0:${NEO4J_BOLT_PORT}"
+#       NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+#       NEO4J_dbms.shell.enabled: "true"
+#       NEO4J_apoc_import_file_enabled: "true"
+#       NEO4J_dbms.default_listen_address: 0.0.0.0
+#       NEO4J_dbms_default__database: ${NEO4J_DATABASE}
+#       # NEO4J_apoc_initializer_cypher: "CALL apoc.cypher.runFile('file:///apoc.cypher_query.cypher')"
+#       # NEO4JLABS_PLUGINS: '["apoc"]'
+#       # NEO4J_dbms_logs_debug_level: DEBUG
+#       # NEO4J_AUTH: none
+#       # NEO4J_kafka_bootstrap_servers: broker:9093
+#       # NEO4J_dbms.security.procedures.whitelist: apoc.coll.*,apoc.load.*,apoc.cypher.*
+#     ports:
+#       - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
+#       - "7687:${NEO4J_BOLT_PORT}"
+#     volumes:
+#       - "./datas/${NEO4J_PATH}/neo4j-runtime/db/data:/data"
+#       - "./datas/${NEO4J_PATH}/neo4j-runtime/logs:/logs"
+#       - "./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
+#       - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
+#     networks:
+#       - intranet
+#     healthcheck:
+#       test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
+#       interval: 3s
+#       timeout: 3s
+#       retries: 50
+#       start_period: 40s
 
-#############################
-##### ORY POSTGRESQL ########
-#############################
+# #############################
+# ##### ORY POSTGRESQL ########
+# #############################
 
   ory-postgresdb:
     image: postgres:13-alpine
@@ -140,9 +140,26 @@ services:
     networks:
       - ory
 
-#############################
-######### KRATOS ############
-#############################
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      LOG_LEVEL: debug
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - ory
+    restart: unless-stopped
+
+
+# #############################
+# ######### KRATOS ############
+# #############################
 
   kratos-migrate:
     image: oryd/kratos:v0.10.1
@@ -182,157 +199,147 @@ services:
 ######### HYDRA #############
 #############################
 
-  hydra-migrate:
-      depends_on:
-          - ${ORY_DB_SERVICE}
-      image: oryd/hydra:v1.11.9
-      container_name: hydra-migrate
-      environment:
-          - DSN=postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
-      command:
-          migrate sql -e --yes
-      restart: on-failure
-      networks: 
-          - ory
+  # hydra-migrate:
+  #     depends_on:
+  #         - ${ORY_DB_SERVICE}
+  #     image: oryd/hydra:v1.11.9
+  #     container_name: hydra-migrate
+  #     environment:
+  #         - DSN=postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+  #     command:
+  #         migrate sql -e --yes
+  #     restart: on-failure
+  #     networks: 
+  #         - ory
 
-  # --------------------------------------------------------------------------------
+  # # --------------------------------------------------------------------------------
+  # hydra:
+  #     depends_on:
+  #         - hydra-migrate
+  #     image: oryd/hydra:v1.11.9
+  #     container_name: hydra
+  #     ports:
+  #         - "4444:4444" # Public port
+  #         - "4445:4445" # Admin port
+  #         - "5555:5555" # Port for hydra token user
+  #     command:
+  #         serve all --dangerous-force-http
+  #     environment:
+  #         - URLS_SELF_ISSUER=http://127.0.0.1:4444
+  #         - URLS_CONSENT=http://127.0.0.1:4200/oauth2/consent
+  #         - URLS_LOGIN=http://127.0.0.1:4200/oauth2/login
+  #         - URLS_LOGOUT=http://127.0.0.1:4200/oauth2/logout
+  #         - SECRETS_SYSTEM=youReallyNeedToChangeThis
+  #         - SERVE_ADMIN_PORT=4445
+  #         - OIDC_SUBJECT_IDENTIFIERS_SUPPORTED_TYPES=public,pairwise
+  #         - OIDC_SUBJECT_IDENTIFIERS_PAIRWISE_SALT=youReallyNeedToChangeThis
+  #         - HYDRA_ADMIN_URL=http://127.0.0.1:4445
+  #         - DSN=postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+  #     restart: unless-stopped
+  #     networks: 
+  #         - ory
+
+  hydra-migrate:
+    image: oryd/hydra:${HYDRA_VERSION}
+    container_name: hydra-migrate
+    links:
+      - ${ORY_DB_SERVICE}:${ORY_DB_SERVICE}
+    networks:
+      - ory
+    environment:
+      - LOG_LEVEL=debug
+      - HYDRA_SYSTEM_SECRET=${HYDRA_SYSTEM_SECRET}
+    command:
+      migrate sql --yes postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+    restart: on-failure
+
   hydra:
-      depends_on:
-          - hydra-migrate
-      image: oryd/hydra:v1.11.9
-      container_name: hydra
-      ports:
-          - "4444:4444" # Public port
-          - "4445:4445" # Admin port
-          - "5555:5555" # Port for hydra token user
-      command:
-          serve all --dangerous-force-http
-      environment:
-          - URLS_SELF_ISSUER=http://127.0.0.1:4444
-          - URLS_CONSENT=http://127.0.0.1:4200/oauth2/consent
-          - URLS_LOGIN=http://127.0.0.1:4200/oauth2/login
-          - URLS_LOGOUT=http://127.0.0.1:4200/oauth2/logout
-          - SECRETS_SYSTEM=youReallyNeedToChangeThis
-          - SERVE_ADMIN_PORT=4445
-          - OIDC_SUBJECT_IDENTIFIERS_SUPPORTED_TYPES=public,pairwise
-          - OIDC_SUBJECT_IDENTIFIERS_PAIRWISE_SALT=youReallyNeedToChangeThis
-          - HYDRA_ADMIN_URL=http://127.0.0.1:4445
-          - DSN=postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
-      restart: unless-stopped
-      networks: 
-          - ory
+    image: oryd/hydra:${HYDRA_VERSION}
+    container_name: hydra
+    links:
+      - ${ORY_DB_SERVICE}:${ORY_DB_SERVICE}
+    ports:
+      - "4444:4444"
+      - "4445:4445"
+    depends_on:
+      - hydra-migrate
+    command:
+      serve all --dangerous-force-http
+    networks:
+      - ory
+    environment:
+      - CORS_ENABLED=true
+      - CORS_ALLOWED_METHODS=POST,GET,PUT,DELETE
+      - LOG_LEVEL=debug
+      - SECRETS_SYSTEM=${SYSTEM_SECRET}
+      - DSN=postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
+      - OAUTH2_CONSENT_URL=http://${BROWSER_IDP_HOST}:4200/consent
+      - OAUTH2_LOGIN_URL=http://${BROWSER_IDP_HOST}:4200/login
+      - OAUTH2_ISSUER_URL=http://${BROWSER_HYDRA_HOST}:4444
+      - OAUTH2_SHARE_ERROR_DEBUG=1
+    restart: on-failure
+
+  configurator:
+    build:
+      context: ./ory/configurator
+      dockerfile: Dockerfile
+      args:
+        - HYDRA_VERSION=$HYDRA_VERSION
+        # - KETO_VERSION=$KETO_VERSION
+        # - OATHKEEPER_VERSION=$OATHKEEPER_VERSION
+    depends_on:
+      - hydra
+      # - keto
+      # - oathkeeper-api
+    networks:
+      - ory
+    environment:
+      # All of these URLs MUST NOT end with a trailing slash. This is very important!
+      - HYDRA_URL=http://hydra:4444
+      - HYDRA_ADMIN_URL=http://hydra:4445
+      # - KETO_URL=http://keto:4466
+      # - RESOURCE_SERVER_URL=http://resource-server:4478
+      # - OATHKEEPER_API_URL=http://oathkeeper-api:4456
+      # - OATHKEEPER_PROXY_URL=http://oathkeeper-proxy:4455
+
+      # This sets the prefix for all resource, action, and subject names. Be aware that this prefix is automatically
+      # applied to all OAuth2 Clients as well.
+      - "HYDRA_SUBJECT_PREFIX=subjects:hydra:"
+      - "HYDRA_RESOURCE_PREFIX=resources:hydra:"
+      - "HYDRA_ACTION_PREFIX=actions:hydra:"
+      # - "OATHKEEPER_RESOURCE_PREFIX=resources:oathkeeper:"
+      # - "OATHKEEPER_ACTION_PREFIX=actions:oathkeeper:"
+      # - "KETO_RESOURCE_PREFIX=resources:keto:"
+      # - "KETO_ACTION_PREFIX=actions:keto:"
+
+      # - OATHKEEPER_HYDRA_JWK_SET_ID=jwk:oathkeeper
+      # - OATHKEEPER_HYDRA_CLIENT_ID=clients:oathkeeper-client
+      # - OATHKEEPER_HYDRA_CLIENT_SECRET=dummy-oathkeeper-secret
+    restart: on-failure
 
 #############################
 ######### KETO ##############
 #############################
 
-  keto-migrate:
-      depends_on:
-          - ${ORY_DB_SERVICE}
-      image: oryd/keto:v0.9.0
-      container_name: keto-migrate
-      restart: on-failure
-      command:
-          migrate up -c /etc/config/keto/keto.yml --yes
-      environment:
-          DSN: postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
-      volumes:
-          -
-              type: bind
-              source: ./ory/keto
-              target: /etc/config/keto
-          -
-              type: bind
-              source: ./ory/keto_namespaces
-              target: /keto_namespaces
-      networks:
-          - ory
-  # --------------------------------------------------------------------------------
-  keto:
-      depends_on:
-          - keto-migrate
-      image: oryd/keto:v0.9.0
-      container_name: keto
-      restart: unless-stopped
-      command:
-          serve -c /etc/config/keto/keto.yml all
-      environment:
-          DSN: postgres://${ORY_DB_USER}:${ORY_DB_PASSWORD}@${ORY_DB_SERVICE}:${ORY_DB_PORT}/${ORY_DB_NAME}?sslmode=disable&max_conns=20&max_idle_conns=4
-          LOG_LEAK_SENSITIVE_VALUES: "true"
-          LOG_LEVEL: trace
-          # TRACING_PROVIDER: jaeger
-          # TRACING_SERVICE_NAME: Keto
-          # TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL: http://jaeger:5778/sampling
-          # TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS: jaeger:6831
-          # TRACING_PROVIDER_JAEGER_SAMPLING_TYPE: const
-          # TRACING_PROVIDER_JAEGER_SAMPLING_VALUE: 1
-      volumes:
-          -
-              type: bind
-              source: ./ory/keto
-              target: /etc/config/keto
-          -
-              type: bind
-              source: ./ory/keto_namespaces
-              target: /keto_namespaces
-      ports:
-          - 4466:4466
-          - 4467:4467
-      networks:
-          - ory
-
 #############################
 ######### OATHKEEPER ########
 #############################
-
-  # oathkeeper:
-  #     depends_on:
-  #         - ${ORY_DB_SERVICE}
-  #     image: oryd/oathkeeper:v0.39.0
-  #     restart: unless-stopped
-  #     command: serve --config=/etc/config/oathkeeper/oathkeeper.yml
-  #     environment:
-  #         LOG_LEVEL: debug
-  #         LOG_LEAK_SENSITIVE_VALUES: "true"
-  #         TRACING_PROVIDER: jaeger
-  #         TRACING_SERVICE_NAME: Oathkeeper
-  #         TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL: http://jaeger:5778/sampling
-  #         TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS: jaeger:6831
-  #         TRACING_PROVIDER_JAEGER_SAMPLING_TYPE: const
-  #         TRACING_PROVIDER_JAEGER_SAMPLING_VALUE: 1
-  #     volumes:
-  #         -
-  #             type: bind
-  #             source: ./configs/oathkeeper
-  #             target: /etc/config/oathkeeper
-  #     ports:
-  #         - 4455:4455
-  #         - 4456:4456
-  #     networks:
-  #         - ory
 
 #############################
 ######### JAEGER ############
 #############################
 
-  jaeger:
-      image: jaegertracing/all-in-one:1.22
-      ports:
-          - 16686:16686
-      networks:
-          - ory
-
 #############################
 ######## MAILSLURPER ########
 #############################
 
-  mailslurper:
-      image: oryd/mailslurper:smtps-latest
-      ports:
-          - "4436:4436"
-          - "4437:4437"
-      networks:
-          - ory
+  # mailslurper:
+  #     image: oryd/mailslurper:smtps-latest
+  #     ports:
+  #         - "4436:4436"
+  #         - "4437:4437"
+  #     networks:
+  #         - ory
 
 
 #############################
@@ -463,6 +470,7 @@ services:
 
 volumes:
   postgresdb-data:
+  pgadmin:
 
 networks:
   intranet:
