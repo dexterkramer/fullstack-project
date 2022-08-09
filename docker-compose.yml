@@ -114,8 +114,66 @@ services:
       start_period: 40s
 
 #############################
-######### /neo4j ############
+######### keycloak ##########
 #############################
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=${KC_DB_USER}
+      - POSTGRES_DATABASE=${KC_DB_DATABASE}
+      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
+    volumes:
+      - ./keycloak/postgres_data:/var/lib/postgresql/data
+    networks:
+      - neo4j_net
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d keycloak -U keycloak"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s  
+
+  sso:
+    image: quay.io/keycloak/keycloak:19.0.1
+    container_name: keycloak
+    # volumes:
+    #   - /etc/localtime:/etc/localtime:ro
+    #   - ./config/profile.properties:/opt/jboss/keycloak/standalone/configuration/profile.properties
+      # add plugins for hot deployment in running in KC
+      #- ./plugins:/opt/jboss/keycloak/standalone/deployments/
+    command: start-dev
+    environment:
+      # KEYCLOAK_ADMIN: admin
+      # KEYCLOAK_ADMIN_PASSWORD: changeme
+      # KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      # KC_DB_USERNAME: keycloak
+      # KC_DB_PASSWORD: changeme
+      # KC_HOSTNAME: localhost
+      # KC_DB: keycloak
+      # KC_FEATURES: token-exchange
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      # - PROXY_ADDRESS_FORWARDING=true
+      # - KEYCLOAK_LOGLEVEL=INFO 
+      # - KEYCLOAK_STATISTICS=all
+      - DB_VENDOR=${KC_DB_VENDOR}
+      - DB_ADDR=${KC_DB_ADDR}
+      - DB_USER=${KC_DB_USER}
+      - DB_PASSWORD=${KC_DB_PASSWORD}
+      - DB_DATABASE=${KC_DB_DATABASE}
+      - DB_SCHEMA=${KC_DB_SCHEMA}
+    networks:
+      - neo4j_net
+    ports:
+      - 8090:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 
 #############################
 ####### confluentinc ########
