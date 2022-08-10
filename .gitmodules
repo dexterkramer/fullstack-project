@@ -1,3 +1,9 @@
 [submodule "datas/neo4j-docker"]
 	path = datas/neo4j-docker
 	url = https://github.com/dexterkramer/neo4j-docker.git
+[submodule "clients/demo-frontend"]
+	path = clients/demo-frontend
+	url = https://github.com/dexterkramer/demo-frontend.git
+[submodule "apis/demo-api"]
+	path = apis/demo-api
+	url = https://github.com/dexterkramer/demo-api.git
