@@ -4,7 +4,7 @@ A fullstack project with submodule and dev/production mode
 Goals : 
 
 docker
-# Golang
+(Golang)
 neo4J (optional PostgreSQL)
 Graphql API
 nest
