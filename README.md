@@ -49,7 +49,7 @@ RGPD
 
 Compare changes in database / trigger events
 
-Gestion des script cron/déclencher sur evenement.
+Gestion des script cron/ triggered on events.
 
 Complete SSO
 
