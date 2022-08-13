@@ -22,7 +22,7 @@ services:
       JWT_SECRET: 1hard_to_guess_secret7890a
       PORT: ${NEST_SERVER_PORT}
     ports:
-      - 8080:${NEST_SERVER_PORT}
+      - ${NEST_SERVER_PORT}:${NEST_SERVER_PORT}
       # debugging port
       - 9229:9229
     networks:
@@ -137,7 +137,7 @@ services:
       retries: 5
       start_period: 30s
 
-  sso:
+  keycloak:
     image: quay.io/keycloak/keycloak:19.0.1
     container_name: keycloak
     # volumes:
@@ -163,7 +163,7 @@ services:
     networks:
       - neo4j_net
     ports:
-      - 8090:8080
+      - 8080:8080
     depends_on:
       kc-postgres:
         condition: service_healthy
