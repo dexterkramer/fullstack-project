@@ -1,30 +1,30 @@
 .PHONY: status logs start stop clean
 
 status: ## Get status of containers
-	docker-compose ps
+	sudo docker-compose ps
 
 logs: ## Get logs of containers
-	docker-compose logs --tail=0 --follow
+	sudo docker-compose logs --tail=0 --follow
 
 start:build ## Build and start docker containers
-	docker-compose up -d
+	sudo docker-compose up -d
 
 dev: 
-	docker-compose up
+	sudo docker-compose up
 
 destroy:
-	docker-compose stop
-	docker-compose down -v --remove-orphans
-	docker system prune -a --volumes -f
+	sudo docker-compose stop
+	sudo docker-compose down -v --remove-orphans
+	sudo docker system prune -a --volumes -f
 
 prune: 
-	docker system prune -a --volumes -f
+	sudo docker system prune -a --volumes -f
 
 stop-all:
-	docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+	sudo docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 stop: ## Stop docker containers
-	docker-compose stop
+	sudo docker-compose stop
 
 clean:stop ## Stop docker containers, clean data and workspace
-	docker-compose down -v --remove-orphans
+	sudo docker-compose down -v --remove-orphans

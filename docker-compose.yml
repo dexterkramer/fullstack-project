@@ -21,12 +21,13 @@ services:
       NODE_ENV: ${NODE_ENV}
       JWT_SECRET: 1hard_to_guess_secret7890a
       PORT: ${NEST_SERVER_PORT}
-    ports:
-      - ${NEST_SERVER_PORT}:${NEST_SERVER_PORT}
-      # debugging port
-      - 9229:9229
-    networks:
-      - neo4j_net
+    # ports:
+    #   - ${NEST_SERVER_PORT}:${NEST_SERVER_PORT}
+    #   # debugging port
+    #   - 9229:9229
+    network_mode: host
+    # networks:
+    #   - neo4j_net
     depends_on:
       neo4j:
         condition: service_healthy
