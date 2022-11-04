@@ -126,7 +126,7 @@ services:
       - POSTGRES_DATABASE=${KC_DB_DATABASE}
       - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
     volumes:
-      - ./keycloak/postgres_data:/var/lib/postgresql/data
+      - "./keycloak/postgres_data:/var/lib/postgresql/data"
     networks:
       - neo4j_net
     ports:
@@ -146,6 +146,8 @@ services:
     #   - ./config/profile.properties:/opt/jboss/keycloak/standalone/configuration/profile.properties
       # add plugins for hot deployment in running in KC
       #- ./plugins:/opt/jboss/keycloak/standalone/deployments/
+    volumes:
+      - "./keycloak/realms/import:/tmp/import"
     command: start-dev
     # entrypoint: /opt/keycloak/bin/kc.sh start --auto-build
     env_file:

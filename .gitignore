@@ -350,3 +350,5 @@ MigrationBackup/
 .ionide/
 
 postgres_data/
+
+realms/import/*
