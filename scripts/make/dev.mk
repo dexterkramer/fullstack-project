@@ -1,30 +1,41 @@
 .PHONY: status logs start stop clean
 
 status: ## Get status of containers
-	sudo docker-compose ps
+	docker-compose ps
 
 logs: ## Get logs of containers
-	sudo docker-compose logs --tail=0 --follow
+	docker-compose logs --tail=0 --follow
 
 start:build ## Build and start docker containers
-	sudo docker-compose up -d
+	docker-compose up -d
 
 dev: 
-	sudo docker-compose up
+	docker-compose up -d
+	docker-compose logs --tail=10000 -f
+
+log: 
+	docker-compose logs --tail=10000 -f
 
 destroy:
-	sudo docker-compose stop
-	sudo docker-compose down -v --remove-orphans
-	sudo docker system prune -a --volumes -f
+	docker-compose stop
+	docker-compose down -v --remove-orphans
+	docker system prune -a --volumes -f
 
 prune: 
-	sudo docker system prune -a --volumes -f
+	docker system prune -a --volumes -f
 
 stop-all:
-	sudo docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+	docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 stop: ## Stop docker containers
-	sudo docker-compose stop
+	docker-compose stop
 
 clean:stop ## Stop docker containers, clean data and workspace
-	sudo docker-compose down -v --remove-orphans
+	docker-compose down -v --remove-orphans
+
+addUserToDockerGroup:
+	sudo usermod -aG docker $USER
+	newgrp docker
+
+kafka-source:
+	curl -X POST http://localhost:8083/connectors   -H 'Content-Type:application/json'   -H 'Accept:application/json'   -d @contrib.source.avro.neo4j.json

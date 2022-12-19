@@ -3,25 +3,25 @@ A fullstack project with submodule and dev/production mode
 
 # Goals : 
 
-docker
+<!-- docker -->
 
 (Golang)
 
-neo4J (optional PostgreSQL)
+<!-- neo4J (optional PostgreSQL) -->
 
 Graphql API
 
-nestjs
+<!-- nestjs -->
 
 angular
 
 e2e
 
-Centreon / confluentinc / BI solution
+Centreon / BI solution
 
-git submodules
+<!-- git submodules -->
 
-import data in neo4j
+<!-- import data in neo4j -->
 
 i18n l10n i21n
 
@@ -31,11 +31,11 @@ Elastic search on Neo4j database
 
 State machine workflow
 
-neo4j multiple seeding source
+<!-- neo4j multiple seeding source -->
 
 Asset managment
 
-REDIS / Kafka
+REDIS / confluentinc / Kafka
 
 HTTPS
 
@@ -51,6 +51,8 @@ Compare changes in database / trigger events
 
 Gestion des script cron/ triggered on events.
 
-Complete SSO
+<!-- Complete SSO -->
+
+CSS/style global managment
 
 Dev for angular and nestjs as close as prod
