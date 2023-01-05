@@ -188,6 +188,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     logging:
       driver: none
+    # healthcheck:
+    #   test: echo srvr | nc zookeeper 2181 || exit 1
+    #   retries: 20
+    #   interval: 10s
     networks:
       - neo4j_net
 
@@ -198,6 +202,11 @@ services:
     depends_on:
       - zookeeper
       - keycloak
+    # healthcheck:
+    #   test: curl --user superUser:superUser -fail --silent --insecure https://localhost:9092/kafka/v3/clusters/ --output /dev/null || exit 1
+    #   interval: 10s
+    #   retries: 25
+    #   start_period: 20s
     # ports:
     #   - "9092:9092"
     # expose:
@@ -219,45 +228,12 @@ services:
       KAFKA_SASL_ENABLED_MECHANISMS: OAUTHBEARER
       KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
-      # KAFKA_SASL__PLAINTEXT_OAUTHBEARER_JWKS_ENDPOINT_URL: localhost:8080/realms/demo/protocol/openid-connect
-
-      # KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.internals.unsecured.OAuthBearerUnsecuredValidatorCallbackHandler
-      # KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.internals.unsecured.OAuthBearerUnsecuredLoginCallbackHandler
-
       KAFKA_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
       KAFKA_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
-      # KAFKA_clientId: kafka_broker
-      # KAFKA_CLIENTSECRET: "1OTHIcJEIIbXV8dJnzx3aN7RLRmhyfnt"
-      # clientId: kafka_broker
-      # CLIENTSECRET: "1OTHIcJEIIbXV8dJnzx3aN7RLRmhyfnt"
-  # listener.name.external.oauthbearer.sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
-  #   listener.name.external.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-  #   listener.name.external.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-  #     clientSecret="<client-secret>" \
-  #     clientId="oauth-client-id";
-
-  #   listener.name.oauth.oauthbearer.sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
-  #   listener.name.oauth.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-  #   listener.name.oauth.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-  #     clientSecret="<client-secret>" \
-  #     clientId="oauth-client-id";
-
-
-      # OAUTH_LOGIN_SERVER: "localhost:8080/realms/demo/protocol/openid-connect"
-      # OAUTH_LOGIN_ENDPOINT: "/token"
-      # OAUTH_LOGIN_GRANT_TYPE: "client_credentials"
-      # OAUTH_CLIENT_ID: "kafka_broker"
-      # OAUTH_CLIENT_SECRET: "1OTHIcJEIIbXV8dJnzx3aN7RLRmhyfnt"
-      # OAUTH_INTROSPECT_SERVER: "localhost:8080/realms/demo/protocol/openid-connect"
-      # OAUTH_INTROSPECT_ENDPOINT: "/token/introspect"
-      # OAUTH_ACCEPT_UNSECURE_SERVER: "true"
-      # OAUTH_WITH_SSL: "false"
-      # OAUTH_AUTHORIZATION : "Basic a2Fma2FfYnJva2VyOjFPVEhJY0pFSUliWFY4ZEpuengzYU43UkxSbWh5Zm50"
-      # OAUTH_INTROSPECT_AUTHORIZATION : "Basic a2Fma2FfYnJva2VyOjFPVEhJY0pFSUliWFY4ZEpuengzYU43UkxSbWh5Zm50"
+      KAFKA_sasl_oauthbearer_expected_audience: account
     volumes:
       - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
       # - ./kafka/config/server.properties:/etc/kafka/server.properties
-      - ./kafka/lib/kafka-oauth-1.0.0.jar:/usr/share/java/kafka/kafka-oauth-1.0.0.jar
     network_mode: host
     # logging:
     #   driver: none
@@ -282,74 +258,100 @@ services:
     networks:
       - neo4j_net
   
-  # connect:
-  #   image: confluentinc/cp-kafka-connect
-  #   hostname: connect
-  #   container_name: connect
-  #   depends_on:
-  #     - zookeeper
-  #     - broker
-  #     - schema_registry
-  #   ports:
-  #     - "8083:8083"
-  #   volumes:
-  #     - ./kafka/plugins:/tmp/connect-plugins
-  #   environment:
-  #     CONNECT_BOOTSTRAP_SERVERS: 'broker:9093'
-  #     CONNECT_REST_ADVERTISED_HOST_NAME: connect
-  #     CONNECT_REST_PORT: 8083
-  #     CONNECT_GROUP_ID: compose-connect-group
-  #     CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-  #     CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-  #     CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
-  #     CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
-  #   # command:
-  #   #  - bash
-  #   #  - -c
-  #   #  - |
-  #   #    confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:5.0.0
-  #   #     /etc/confluent/docker/run
-  #   logging:
-  #     driver: none
-  #   networks:
-  #     - neo4j_net
+  connect:
+    image: confluentinc/cp-kafka-connect
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - zookeeper
+      - broker
+      - schema_registry
+    # ports:
+    #   - "8083:8083"
+    volumes:
+      - ./kafka/plugins:/tmp/connect-plugins
+    environment:
+      CONNECT_SASL_MECHANISM: OAUTHBEARER
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+        clientSecret=\"A7B3DogD40DjNOlNwkD6rFn2BSrnHs9f\" \
+        clientId=\"test_consumer\";"
+      CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONNECT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      CONNECT_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      CONNECT_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
+      CONNECT_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
+      CONNECT_sasl_oauthbearer_expected_audience: account
 
-  # control-center:
-  #   image: confluentinc/cp-enterprise-control-center
-  #   hostname: control-center
-  #   container_name: control-center
-  #   depends_on:
-  #     - zookeeper
-  #     - broker
-  #     - schema_registry
-  #     - connect
-  #   ports:
-  #     - "9021:9021"
-  #   environment:
-  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:9093'
-  #     CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-  #     CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
-  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
-  #     CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-  #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-  #     CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-  #     PORT: 9021
-  #   logging:
-  #     driver: none
-  #   networks:
-  #     - neo4j_net
+
+      CONNECT_BOOTSTRAP_SERVERS: 'localhost:9093'
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://localhost:8081'
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://localhost:8081'
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_ZOOKEEPER_CONNECT: 'localhost:2181'
+      CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
+    # command:
+    #  - bash
+    #  - -c
+    #  - |
+    #    confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:5.0.0
+    #     /etc/confluent/docker/run
+    logging:
+      driver: none
+    network_mode: host
+    # networks:
+    #   - neo4j_net
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - zookeeper
+      - broker
+      - schema_registry
+      - connect
+    # ports:
+    #   - "9021:9021"
+    environment:
+      # CONTROL_CENTER_SASL_MECHANISM: OAUTHBEARER
+      # CONTROL_CENTER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+      #   clientSecret=\"A7B3DogD40DjNOlNwkD6rFn2BSrnHs9f\" \
+      #   clientId=\"test_consumer\";"
+      # CONTROL_CENTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      # CONTROL_CENTER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      # CONTROL_CENTER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      # CONTROL_CENTER_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
+      # CONTROL_CENTER_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
+      # CONTROL_CENTER_sasl_oauthbearer_expected_audience: account
+
+
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: '0.0.0.0:9093'
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: '0.0.0.0:2181'
+      CONTROL_CENTER_CONNECT_CLUSTER: '0.0.0.0:8083'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+    # logging:
+    #   driver: none
+    # networks:
+    #   - neo4j_net
+    network_mode: host
 
 networks:
   neo4j_net:
