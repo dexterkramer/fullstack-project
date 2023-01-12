@@ -1,120 +1,103 @@
 version: "3.8"
 services:
 
-  # api:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./apis/${API_PATH}
-  #     target: development
-  #     args:
-  #       - NODE_ENV=${NODE_ENV}
-  #   container_name: ${API_CONTAINER_NAME}
-  #   volumes:
-  #     - "./apis/${API_PATH}/src:/opt/app/src"
-  #     - "./apis/${API_PATH}/test:/opt/app/test"
-  #     - "./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json"
-  #     - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
-  #     - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
-  #     - "./apis/${API_PATH}/.env:/opt/app/.env"
-  #   command: ./node_modules/.bin/nest start --watch
-  #   environment: 
-  #     NODE_ENV: ${NODE_ENV}
-  #     JWT_SECRET: 1hard_to_guess_secret7890a
-  #     PORT: ${NEST_SERVER_PORT}
-  #   # ports:
-  #   #   - ${NEST_SERVER_PORT}:${NEST_SERVER_PORT}
-  #   #   # debugging port
-  #   #   - 9229:9229
-  #   network_mode: host
-  #   # networks:
-  #   #   - neo4j_net
-  #   depends_on:
-  #     neo4j:
-  #       condition: service_healthy
+  api:
+    image: my_api:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./apis/${API_PATH}
+      target: development
+      args:
+        - NODE_ENV=${NODE_ENV}
+    container_name: ${API_CONTAINER_NAME}
+    volumes:
+      - "./apis/${API_PATH}/src:/opt/app/src"
+      - "./apis/${API_PATH}/test:/opt/app/test"
+      - "./apis/${API_PATH}/nest-cli.json:/opt/app/nest-cli.json"
+      - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
+      - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
+      - "./apis/${API_PATH}/.env:/opt/app/.env"
+    command: ./node_modules/.bin/nest start --watch
+    environment: 
+      NODE_ENV: ${NODE_ENV}
+      JWT_SECRET: 1hard_to_guess_secret7890a
+      PORT: ${NEST_SERVER_PORT}
+    ports:
+      - ${NEST_SERVER_PORT}:${NEST_SERVER_PORT}
+      # debugging port
+      - 9229:9229
+    # network_mode: host
+    networks:
+      - neo4j_net
+    depends_on:
+      neo4j:
+        condition: service_healthy
 
-  # client:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./clients/${CLIENT_PATH}
-  #     args:
-  #       - NODE_ENV=${NODE_ENV}
-  #   container_name: ${CLIENT_CONTAINER_NAME}
-  #   volumes:
-  #     - "./clients/${CLIENT_PATH}/src:/opt/app/src"
-  #     - "./clients/${CLIENT_PATH}/angular.json:/opt/app/angular.json"
-  #     - "./clients/${CLIENT_PATH}/karma.conf.js:/opt/app/karma.conf.js"
-  #     - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/app/tsconfig.app.json"
-  #     - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/app/tsconfig.spec.json"
-  #     - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/app/tsconfig.json"
-  #   command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
-  #   ports:
-  #     - 4200:4200
-  #     # debugging port
-  #     # - 49153:49153
+  client:
+    image: my_client:latest
+    build:
+      dockerfile: Dockerfile
+      context: ./clients/${CLIENT_PATH}
+      args:
+        - NODE_ENV=${NODE_ENV}
+    container_name: ${CLIENT_CONTAINER_NAME}
+    volumes:
+      - "./clients/${CLIENT_PATH}/src:/opt/app/src"
+      - "./clients/${CLIENT_PATH}/angular.json:/opt/app/angular.json"
+      - "./clients/${CLIENT_PATH}/karma.conf.js:/opt/app/karma.conf.js"
+      - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/app/tsconfig.app.json"
+      - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/app/tsconfig.spec.json"
+      - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/app/tsconfig.json"
+    command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
+    ports:
+      - 4200:4200
+      # debugging port
+      - 49153:49153
 
-# #############################
-# ######### neo4j #############
-# #############################
-
-  # neo4j-seeder:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./datas/${NEO4J_PATH}/seeder-container
-  #   container_name: neo4j-seeder
-  #   environment:
-  #     NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
-  #     NEO4J_USERNAME: ${NEO4J_USERNAME}
-  #     NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-  #     NEO4J_PORT: ${NEO4J_PORT}
-  #     NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
-  #   volumes:
-  #     - "./datas/${NEO4J_PATH}/seeder-container/to-import:/import"
-  #   networks:
-  #     - neo4j_net
-  #   depends_on:
-  #     neo4j:
-  #       condition: service_healthy
+#############################
+######### neo4j #############
+#############################
   
-  # neo4j:
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: ./datas/${NEO4J_PATH}
-  #   hostname: ${NEO4J_HOSTNAME}
-  #   container_name: neo4j
-  #   restart: always
-  #   environment:
-  #     NEO4J_AUTH: ${NEO4J_USERNAME}/${NEO4J_PASSWORD}
-  #     NEO4J_dbms_memory_heap_max__size: ${NEO4J_MEM_HEAP}
-  #     NEO4J_dbms_connector_bolt_advertised__address: "0.0.0.0:${NEO4J_BOLT_PORT}"
-  #     NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
-  #     NEO4J_dbms.shell.enabled: "true"
-  #     NEO4J_apoc_import_file_enabled: "true"
-  #     NEO4J_apoc_export_file_enabled: "true"
-  #     NEO4J_dbms.default_listen_address: 0.0.0.0
-  #     NEO4J_dbms_default__database: ${NEO4J_DATABASE}
-  #     # NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
-  #     # NEO4J_apoc_initializer_cypher: "CALL apoc.cypher.runFile('file:///apoc.cypher_query.cypher')"
-  #     # NEO4JLABS_PLUGINS: '["apoc"]'
-  #     # NEO4J_dbms_logs_debug_level: DEBUG
-  #     # NEO4J_AUTH: none
-  #     NEO4J_kafka_bootstrap_servers: broker:9093
-  #     # NEO4J_dbms.security.procedures.whitelist: apoc.coll.*,apoc.load.*,apoc.cypher.*
-  #   ports:
-  #     - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
-  #     - "7687:${NEO4J_BOLT_PORT}"
-  #   volumes:
-  #     - "./datas/${NEO4J_PATH}/neo4j-runtime/db/data:/data"
-  #     - "./datas/${NEO4J_PATH}/neo4j-runtime/logs:/logs"
-  #     - "./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
-  #     - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
-  #   networks:
-  #     - neo4j_net
-  #   healthcheck:
-  #     test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
-  #     interval: 3s
-  #     timeout: 3s
-  #     retries: 50
-  #     start_period: 40s
+  neo4j:
+    build:
+      dockerfile: Dockerfile
+      context: ./datas/${NEO4J_PATH}
+    hostname: ${NEO4J_HOSTNAME}
+    container_name: neo4j
+    restart: always
+    environment:
+      NEO4J_AUTH: ${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+      NEO4J_dbms_memory_heap_max__size: ${NEO4J_MEM_HEAP}
+      NEO4J_dbms_connector_bolt_advertised__address: "0.0.0.0:${NEO4J_BOLT_PORT}"
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+      NEO4J_dbms.shell.enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_dbms.default_listen_address: 0.0.0.0
+      NEO4J_dbms_default__database: ${NEO4J_DATABASE}
+      # NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      # NEO4J_apoc_initializer_cypher: "CALL apoc.cypher.runFile('file:///apoc.cypher_query.cypher')"
+      # NEO4JLABS_PLUGINS: '["apoc"]'
+      # NEO4J_dbms_logs_debug_level: DEBUG
+      # NEO4J_AUTH: none
+      NEO4J_kafka_bootstrap_servers: broker:9093
+      # NEO4J_dbms.security.procedures.whitelist: apoc.coll.*,apoc.load.*,apoc.cypher.*
+    ports:
+      - "7474:${NEO4J_PORT}"  # Go to http://localhost:7474/browser/ after bootstrapping
+      - "7687:${NEO4J_BOLT_PORT}"
+    volumes:
+      - "./datas/${NEO4J_PATH}/neo4j-runtime/db/data:/data"
+      - "./datas/${NEO4J_PATH}/neo4j-runtime/logs:/logs"
+      - "./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
+      - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
+    networks:
+      - neo4j_net
+    healthcheck:
+      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
+      interval: 3s
+      timeout: 3s
+      retries: 50
+      start_period: 40s
 
 # # #############################
 # # ######### keycloak ##########
@@ -168,14 +151,20 @@ services:
       - neo4j_net
     ports:
       - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master"]
+      start_period: 10s
+      interval: 10s
+      retries: 9
+      timeout: 5s
     depends_on:
       kc-postgres:
         condition: service_healthy
 
 
-######################
-####### Kafka ########
-######################
+# ######################
+# ####### Kafka ########
+# ######################
 
   zookeeper:
     image: confluentinc/cp-zookeeper
@@ -188,10 +177,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     logging:
       driver: none
-    # healthcheck:
-    #   test: echo srvr | nc zookeeper 2181 || exit 1
-    #   retries: 20
-    #   interval: 10s
+    healthcheck:
+      test: echo srvr | nc zookeeper 2181 || exit 1
+      retries: 50
+      interval: 3s
     networks:
       - neo4j_net
 
@@ -200,59 +189,76 @@ services:
     hostname: broker
     container_name: broker
     depends_on:
-      - zookeeper
-      - keycloak
-    # healthcheck:
-    #   test: curl --user superUser:superUser -fail --silent --insecure https://localhost:9092/kafka/v3/clusters/ --output /dev/null || exit 1
-    #   interval: 10s
-    #   retries: 25
-    #   start_period: 20s
-    # ports:
-    #   - "9092:9092"
-    # expose:
-    # - "9093"
+      zookeeper:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
+      interval: 10s
+      retries: 25
+      start_period: 20s
+    ports:
+      - "9092:9092"
+    expose:
+    - "9093"
     environment:
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:9093
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_BROKER_ID: 1
       # KAFKA_SECURITY_INTER_BROKER_PROTOCOL: PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,PLAINTEXT_HOST://localhost:9092,SASL_PLAINTEXT://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://broker:9092,SASL_PLAINTEXT://broker:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093
       ZOOKEEPER_SASL_ENABLED: "FALSE"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_ZOOKEEPER_CONNECT: 'localhost:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
       KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: OAUTHBEARER
       KAFKA_SASL_ENABLED_MECHANISMS: OAUTHBEARER
       KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
-      KAFKA_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
-      KAFKA_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
+      KAFKA_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+      KAFKA_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/token
       KAFKA_sasl_oauthbearer_expected_audience: account
     volumes:
       - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
       # - ./kafka/config/server.properties:/etc/kafka/server.properties
-    network_mode: host
     # logging:
     #   driver: none
-    # networks:
-    #   - neo4j_net
+    networks:
+      - neo4j_net
 
   schema_registry:
     image: confluentinc/cp-schema-registry
     hostname: schema_registry
     container_name: schema_registry
     depends_on:
-      - zookeeper
-      - broker
+      zookeeper:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     ports:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema_registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://broker:9093'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://broker:9093'
+      
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: OAUTHBEARER
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+        clientSecret=\"A7B3DogD40DjNOlNwkD6rFn2BSrnHs9f\" \
+        clientId=\"test_consumer\";"
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/token
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_expected_audience: account
+
     logging:
       driver: none
     networks:
@@ -263,11 +269,16 @@ services:
     hostname: connect
     container_name: connect
     depends_on:
-      - zookeeper
-      - broker
-      - schema_registry
-    # ports:
-    #   - "8083:8083"
+      zookeeper:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      # schema_registry:
+      #   condition: service_healthy
+    ports:
+      - "8083:8083"
     volumes:
       - ./kafka/plugins:/tmp/connect-plugins
     environment:
@@ -278,12 +289,11 @@ services:
       CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
       CONNECT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
       CONNECT_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-      CONNECT_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
-      CONNECT_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
+      CONNECT_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+      CONNECT_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/token
       CONNECT_sasl_oauthbearer_expected_audience: account
 
-
-      CONNECT_BOOTSTRAP_SERVERS: 'localhost:9093'
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:9093'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: compose-connect-group
@@ -295,12 +305,12 @@ services:
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://localhost:8081'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://localhost:8081'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_ZOOKEEPER_CONNECT: 'localhost:2181'
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
     # command:
@@ -311,37 +321,47 @@ services:
     #     /etc/confluent/docker/run
     logging:
       driver: none
-    network_mode: host
-    # networks:
-    #   - neo4j_net
+    # healthcheck:
+    #   interval: 10s
+    #   retries: 20
+    #   test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://connect:8083/ --output /dev/null || exit 1
+    # network_mode: host
+    networks:
+      - neo4j_net
 
   control-center:
     image: confluentinc/cp-enterprise-control-center
     hostname: control-center
     container_name: control-center
     depends_on:
-      - zookeeper
-      - broker
-      - schema_registry
-      - connect
-    # ports:
-    #   - "9021:9021"
+      zookeeper:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      # schema_registry:
+      #   condition: service_healthy
+      # connect:
+      #   condition: service_healthy
+    ports:
+      - "9021:9021"
     environment:
-      # CONTROL_CENTER_SASL_MECHANISM: OAUTHBEARER
-      # CONTROL_CENTER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-      #   clientSecret=\"A7B3DogD40DjNOlNwkD6rFn2BSrnHs9f\" \
-      #   clientId=\"test_consumer\";"
-      # CONTROL_CENTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
-      # CONTROL_CENTER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
-      # CONTROL_CENTER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-      # CONTROL_CENTER_sasl_oauthbearer_jwks_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/certs
-      # CONTROL_CENTER_sasl_oauthbearer_token_endpoint_url: http://localhost:8080/realms/demo/protocol/openid-connect/token
-      # CONTROL_CENTER_sasl_oauthbearer_expected_audience: account
+      CONTROL_CENTER_STREAMS_SASL_MECHANISM: OAUTHBEARER
+      CONTROL_CENTER_STREAMS_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+        clientSecret=\"A7B3DogD40DjNOlNwkD6rFn2BSrnHs9f\" \
+        clientId=\"test_consumer\";"
+      CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONTROL_CENTER_STREAMS_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      CONTROL_CENTER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      CONTROL_CENTER_STREAMS_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/certs
+      CONTROL_CENTER_STREAMS_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/demo/protocol/openid-connect/token
+      CONTROL_CENTER_STREAMS_sasl_oauthbearer_expected_audience: account
 
 
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: '0.0.0.0:9093'
-      CONTROL_CENTER_ZOOKEEPER_CONNECT: '0.0.0.0:2181'
-      CONTROL_CENTER_CONNECT_CLUSTER: '0.0.0.0:8083'
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:9093'
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
@@ -349,9 +369,9 @@ services:
       PORT: 9021
     # logging:
     #   driver: none
-    # networks:
-    #   - neo4j_net
-    network_mode: host
+    networks:
+      - neo4j_net
+    # network_mode: host
 
 networks:
   neo4j_net:

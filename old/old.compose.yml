@@ -1,0 +1,22 @@
+# # #############################
+# # ######### neo4j #############
+# # #############################
+
+  # neo4j-seeder:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./datas/${NEO4J_PATH}/seeder-container
+  #   container_name: neo4j-seeder
+  #   environment:
+  #     NEO4J_HOSTNAME: ${NEO4J_HOSTNAME}
+  #     NEO4J_USERNAME: ${NEO4J_USERNAME}
+  #     NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+  #     NEO4J_PORT: ${NEO4J_PORT}
+  #     NEO4J_BOLT_PORT: ${NEO4J_BOLT_PORT}
+  #   volumes:
+  #     - "./datas/${NEO4J_PATH}/seeder-container/to-import:/import"
+  #   networks:
+  #     - neo4j_net
+  #   depends_on:
+  #     neo4j:
+  #       condition: service_healthy
