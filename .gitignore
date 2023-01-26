@@ -354,3 +354,5 @@ postgres_data/
 realms/import/*
 
 images/*
+
+__dump/

@@ -13,7 +13,17 @@ importDemo:
 	importKeycloakRealm filepath="/tmp/import/kafka.json"
 	importKeycloakRealm filepath="/tmp/import/demo.json"
 
+moveDumps:
+	sudo mv demo/__dump/neo4j/demo.dump datas/neo4j-docker/neo4j-runtime/import/demo.dump
+	sudo mv demo/__dump/keycloak/demo.json keycloak/realms/import/demo.json
+	sudo mv demo/__dump/keycloak/kafka.json keycloak/realms/import/kafka.json
+
+moveEnvs:
+	sudo mv demo/__env/.env.dist .env
+
 build-demo:
+	make moveEnvs
+	make moveDumps
 	make localizeImage
 	make loadLocalizedImage
 	docker-compose up -d
