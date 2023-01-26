@@ -356,3 +356,5 @@ realms/import/*
 images/*
 
 __dump/
+
+.env
