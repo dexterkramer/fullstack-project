@@ -2,19 +2,60 @@ sudo systemctl start docker
 
 sudo docker exec -it <container_name> bash
 
-How to export keycloak realm "demo" : 
 
-    1 - sudo docker exec -it keycloak bash
+TODO : 
 
-    2 - mkdir /tmp/export
 
-    2 - /opt/keycloak/bin/kc.sh export --file /tmp/export/demo.json --realm demo
+<!-- docker -->
 
-    3 - sudo docker cp keycloak:/tmp/export/demo.json demo.json
+(Golang)
 
-How to import keycloak realm "demo" : 
+<!-- neo4J (optional PostgreSQL) -->
 
-    1 - sudo docker exec -it keycloak bash
+Graphql API
 
-    2 - opt/keycloak/bin/kc.sh import --file /tmp/import/demo.json
+<!-- nestjs -->
 
+angular
+
+e2e
+
+Centreon / BI solution
+
+<!-- git submodules -->
+
+<!-- import data in neo4j -->
+
+i18n l10n i21n
+
+Complete Mails managment and tools
+
+Elastic search on Neo4j database
+
+State machine workflow in nest
+
+<!-- neo4j multiple seeding source -->
+
+Asset managment
+
+REDIS / confluentinc / Kafka
+
+HTTPS
+
+Log pits
+
+Datetime
+
+Accessibility
+
+RGPD
+
+Compare changes in database / trigger events
+
+Gestion des script cron/ triggered on events.
+
+<!-- Complete SSO -->
+
+(CSS/style global managment)
+
+Dev for angular and nestjs as close as prod

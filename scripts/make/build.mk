@@ -6,7 +6,7 @@ build: ## Build docker image
 build-prod: ## Build docker image (production)
 	docker-compose -f docker-compose.prod.yml build
 
-localizeAndNpm:
+localizeAfterNpm:
 	docker save my_api:latest > images/my_api.tar
 	docker save my_client:latest > images/my_client.tar
 
@@ -40,5 +40,7 @@ loadLocalizedImage:
 	docker load < images/cp-kafka-connect.tar
 	docker load < images/cp-enterprise-control-center.tar
 	docker load < images/neo4j.4.4.8-community.tar
+
+LoadLocalizedImageNpm: 
 	docker load < images/my_api.tar
 	docker load < images/my_client.tar

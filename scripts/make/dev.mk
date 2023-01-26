@@ -11,8 +11,9 @@ start:build ## Build and start docker containers
 
 dev: 
 	make loadLocalizedImage
+	make LoadLocalizedImageNpm
 	docker-compose up -d
-	docker-compose logs --tail=10000 -f
+	make log
 
 log: 
 	docker-compose logs --tail=10000 -f

@@ -3,56 +3,31 @@ A fullstack project with submodule and dev/production mode
 
 # Goals : 
 
-<!-- docker -->
+# Prerequisites :
 
-(Golang)
+Update your hosts to make keycloak oauth working localy with : 
 
-<!-- neo4J (optional PostgreSQL) -->
+127.0.0.1 keycloak
 
-Graphql API
 
-<!-- nestjs -->
 
-angular
 
-e2e
 
-Centreon / BI solution
 
-<!-- git submodules -->
 
-<!-- import data in neo4j -->
 
-i18n l10n i21n
+How to export keycloak realm "demo" : 
 
-Complete Mails managment and tools
+    1 - sudo docker exec -it keycloak bash
 
-Elastic search on Neo4j database
+    2 - mkdir /tmp/export
 
-State machine workflow
+    2 - /opt/keycloak/bin/kc.sh export --file /tmp/export/demo.json --realm demo
 
-<!-- neo4j multiple seeding source -->
+    3 - sudo docker cp keycloak:/tmp/export/demo.json demo.json
 
-Asset managment
+How to import keycloak realm "demo" : 
 
-REDIS / confluentinc / Kafka
+    1 - sudo docker exec -it keycloak bash
 
-HTTPS
-
-Log pits
-
-Datetime
-
-Accessibility
-
-RGPD
-
-Compare changes in database / trigger events
-
-Gestion des script cron/ triggered on events.
-
-<!-- Complete SSO -->
-
-CSS/style global managment
-
-Dev for angular and nestjs as close as prod
+    2 - opt/keycloak/bin/kc.sh import --file /tmp/import/demo.json

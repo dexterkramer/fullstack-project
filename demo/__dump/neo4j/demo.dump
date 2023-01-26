@@ -1,0 +1,30 @@
+:begin
+CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT (node.`UNIQUE IMPORT ID`) IS UNIQUE;
+:commit
+CALL db.awaitIndexes(300);
+:begin
+UNWIND [{_id:17, properties:{name:"Facebook"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Company;
+UNWIND [{_id:18, properties:{name:"Clement"}}, {_id:19, properties:{name:"Antoine"}}, {_id:20, properties:{name:"Simon"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Candidate;
+UNWIND [{_id:0, properties:{name:"Sandeep1"}}, {_id:21, properties:{name:"Meghan"}}, {_id:22, properties:{name:"Marli"}}, {_id:23, properties:{name:"Simran"}}, {_id:24, properties:{name:"Sandeep"}}, {_id:25, properties:{name:"Molly"}}, {_id:26, properties:{name:"Aditya"}}, {_id:27, properties:{name:"Brandon"}}, {_id:28, properties:{name:"Pedro"}}, {_id:29, properties:{name:"Ryan"}}, {_id:30, properties:{name:"Akshay"}}, {_id:31, properties:{name:"Xi"}}, {_id:32, properties:{name:"Alex"}}, {_id:33, properties:{name:"Amanda"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:Interviewer;
+UNWIND [{_id:1, properties:{name:"Simon"}}] AS row
+CREATE (n:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row._id}) SET n += row.properties SET n:TestSource;
+:commit
+:begin
+UNWIND [{start: {_id:32}, end: {_id:18}, properties:{score:"passed"}}, {start: {_id:21}, end: {_id:18}, properties:{score:"passed"}}, {start: {_id:23}, end: {_id:18}, properties:{score:"passed"}}, {start: {_id:25}, end: {_id:18}, properties:{score:"failed"}}, {start: {_id:22}, end: {_id:19}, properties:{score:"failed"}}, {start: {_id:30}, end: {_id:19}, properties:{score:"passed"}}, {start: {_id:26}, end: {_id:19}, properties:{score:"passed"}}, {start: {_id:21}, end: {_id:19}, properties:{score:"passed"}}, {start: {_id:22}, end: {_id:20}, properties:{score:"failed"}}, {start: {_id:21}, end: {_id:20}, properties:{score:"failed"}}, {start: {_id:27}, end: {_id:20}, properties:{score:"passed"}}, {start: {_id:31}, end: {_id:20}, properties:{score:"failed"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:INTERVIEWED]->(end) SET r += row.properties;
+UNWIND [{start: {_id:29}, end: {_id:17}, properties:{status:"rejected"}}, {start: {_id:23}, end: {_id:17}, properties:{status:"rejected"}}, {start: {_id:31}, end: {_id:17}, properties:{status:"rejected"}}, {start: {_id:25}, end: {_id:17}, properties:{status:"rejected"}}, {start: {_id:32}, end: {_id:17}, properties:{status:"rejected"}}] AS row
+MATCH (start:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.start._id})
+MATCH (end:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`: row.end._id})
+CREATE (start)-[r:APPLIED]->(end) SET r += row.properties;
+:commit
+:begin
+MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 20000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
+:commit
+:begin
+DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT (node.`UNIQUE IMPORT ID`) IS UNIQUE;
+:commit
