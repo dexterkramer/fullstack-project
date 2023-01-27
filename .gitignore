@@ -358,3 +358,7 @@ images/*
 __dump/
 
 .env
+
+apis/*
+clients/*
+datas/*

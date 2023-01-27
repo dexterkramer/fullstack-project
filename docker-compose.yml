@@ -27,7 +27,7 @@ services:
       # debugging port
       - 9229:9229
     networks:
-      - neo4j_net
+      - fullstack_net
     depends_on:
       neo4j:
         condition: service_healthy
@@ -89,7 +89,7 @@ services:
       - "./datas/${NEO4J_PATH}/neo4j-runtime/import:/import"
       - "./datas/${NEO4J_PATH}/neo4j-runtime/plugins:/plugins"
     networks:
-      - neo4j_net
+      - fullstack_net
     healthcheck:
       test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "${NEO4J_USERNAME}", "-p", "${NEO4J_PASSWORD}", "MATCH () RETURN count(*) as count LIMIT 1" ]
       interval: 3s
@@ -111,7 +111,7 @@ services:
     volumes:
       - "./keycloak/postgres_data:/var/lib/postgresql/data"
     networks:
-      - neo4j_net
+      - fullstack_net
     ports:
       - 5432:5432
     healthcheck:
@@ -146,7 +146,7 @@ services:
         client-policies
         dynamic-scopes
     networks:
-      - neo4j_net
+      - fullstack_net
     ports:
       - 8080:8080
     healthcheck:
@@ -183,7 +183,7 @@ services:
       retries: 50
       interval: 3s
     networks:
-      - neo4j_net
+      - fullstack_net
 
   broker:
     image: confluentinc/cp-kafka
@@ -228,7 +228,7 @@ services:
     logging:
       driver: none
     networks:
-      - neo4j_net
+      - fullstack_net
 
   schema_registry:
     image: confluentinc/cp-schema-registry
@@ -260,7 +260,7 @@ services:
     logging:
       driver: none
     networks:
-      - neo4j_net
+      - fullstack_net
     healthcheck:
       test: ["CMD", "curl", "--output", "/dev/null", "--silent", "--head", "--fail", "http://schema_registry:8081/subjects"]
       interval: 10s
@@ -328,7 +328,7 @@ services:
     #   test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://connect:8083/ --output /dev/null || exit 1
     # network_mode: host
     networks:
-      - neo4j_net
+      - fullstack_net
 
   control-center:
     image: confluentinc/cp-enterprise-control-center
@@ -369,8 +369,8 @@ services:
     logging:
       driver: none
     networks:
-      - neo4j_net
+      - fullstack_net
 
 networks:
-  neo4j_net:
+  fullstack_net:
     driver: bridge

@@ -16,7 +16,7 @@
   #   volumes:
   #     - "./datas/${NEO4J_PATH}/seeder-container/to-import:/import"
   #   networks:
-  #     - neo4j_net
+  #     - neo4j_netfullstack_net
   #   depends_on:
   #     neo4j:
   #       condition: service_healthy
