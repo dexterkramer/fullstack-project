@@ -21,7 +21,13 @@ moveDumps:
 moveEnvs:
 	sudo mv demo/__env/.env.dist .env
 
+getRepos:
+	git clone git@github.com:dexterkramer/demo-api.git ./apis/demo-api
+	git clone git@github.com:dexterkramer/demo-frontend.git ./clients/demo-frontend
+	git clone git@github.com:dexterkramer/neo4j-docker.git ./datas/neo4j-docker
+
 build-demo:
+	make getRepos
 	make moveEnvs
 	make moveDumps
 	make localizeImage
