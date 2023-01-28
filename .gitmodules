@@ -1,6 +1,0 @@
-[submodule "clients/demo-frontend"]
-	path = clients/demo-frontend
-	url = git@github.com:dexterkramer/demo-frontend.git
-[submodule "apis/demo-api"]
-	path = apis/demo-api
-	url = git@github.com:dexterkramer/demo-api.git
