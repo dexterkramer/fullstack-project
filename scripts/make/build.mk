@@ -32,6 +32,7 @@ localizeImage:
 
 # docker load < images/node.16.15.0-alpine.tar
 loadLocalizedImage: 
+	mkdir -p images
 	docker load < images/postgres.tar
 	docker load < images/keycloak.19.0.1.tar
 	docker load < images/cp-zookeeper.tar
