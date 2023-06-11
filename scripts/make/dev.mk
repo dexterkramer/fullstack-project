@@ -4,23 +4,23 @@ status: ## Get status of containers
 	docker-compose ps
 
 logs: ## Get logs of containers
-	docker-compose logs --tail=0 --follow
+	docker compose logs --tail=0 --follow
 
 start:build ## Build and start docker containers
-	docker-compose up -d
+	docker compose up -d
 
 dev: 
 	make loadLocalizedImage
 	make LoadLocalizedImageNpm
-	docker-compose up -d
+	docker compose up -d
 	make log
 
 log: 
-	docker-compose logs --tail=10000 -f
+	docker compose logs --tail=10000 -f
 
 destroy:
-	docker-compose stop
-	docker-compose down -v --remove-orphans
+	docker compose stop
+	docker compose down -v --remove-orphans
 	docker system prune -a --volumes -f
 
 prune: 
@@ -30,10 +30,10 @@ stop-all:
 	docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
 stop: ## Stop docker containers
-	docker-compose stop
+	docker compose stop
 
 clean:stop ## Stop docker containers, clean data and workspace
-	docker-compose down -v --remove-orphans
+	docker compose down -v --remove-orphans
 
 addUserToDockerGroup:
 	sudo usermod -aG docker $USER

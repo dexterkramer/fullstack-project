@@ -1,16 +1,17 @@
 .PHONY: build build-prod
 
 build: ## Build docker image
-	docker-compose build
+	docker compose build
 
 build-prod: ## Build docker image (production)
-	docker-compose -f docker-compose.prod.yml build
+	docker compose -f docker-compose.prod.yml build
 
 localizeAfterNpm:
 	docker save my_api:latest > images/my_api.tar
 	docker save my_client:latest > images/my_client.tar
 
 localizeImage:
+	mkdir -p images
 	docker pull postgres
 	docker save postgres > images/postgres.tar
 	docker pull quay.io/keycloak/keycloak:19.0.1
@@ -32,7 +33,6 @@ localizeImage:
 
 # docker load < images/node.16.15.0-alpine.tar
 loadLocalizedImage: 
-	mkdir -p images
 	docker load < images/postgres.tar
 	docker load < images/keycloak.19.0.1.tar
 	docker load < images/cp-zookeeper.tar

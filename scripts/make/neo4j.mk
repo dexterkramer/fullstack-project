@@ -18,4 +18,4 @@ cleanNeo4jDatabase:
 	sudo docker exec -it neo4j cypher-shell -u neo4j -p connect -d $(database) "match (a) delete a"
 
 importNeo4jCypher:
-	sudo docker exec -it neo4j cypher-shell -u neo4j -p connect -d $(database) "CALL apoc.cypher.runFile('$(filePath)')" 
+	docker exec -it neo4j cypher-shell -u neo4j -p connect -d $(database) "CALL apoc.cypher.runFile('$(filePath)')" 
