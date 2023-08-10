@@ -66,8 +66,8 @@ services:
     volumes:
       - ./kafka/broker/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
       # - ./kafka/config/server.properties:/etc/kafka/server.properties
-    # logging:
-    #   driver: none
+    logging:
+      driver: none
     networks:
       - fullstack_net
 

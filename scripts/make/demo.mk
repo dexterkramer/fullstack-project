@@ -27,20 +27,8 @@ getRepos:
 	git clone git@github.com:dexterkramer/demo-frontend.git ./projects/demo/clients/demo-frontend
 	git clone git@github.com:dexterkramer/neo4j-docker.git ./projects/demo/datas/neo4j-docker
 
-build-demo:
-	make getRepos
-	make moveEnvs
-	make moveDumps
-##	make localizeImage
-	make loadLocalizedImage
-	docker compose -p fullstack -f docker-compose.yml up -d 
-##	make localizeAfterNpm
-	make importDemo
-	docker compose -p fullstack -f docker-compose.yml -f docker-compose-kafka.yml up -d
-	echo "Demo installed..."
-
 deployDemo:
-	rm -rf projects/demo/
+	sudo rm -rf projects/demo/
 	mkdir -p projects/demo/
 	mkdir -p projects/demo/apis/
 	mkdir -p projects/demo/clients/
@@ -58,3 +46,23 @@ deployDemo:
 	make localizeAfterNpm
 	make importDemo
 	docker compose -p fullstack -f projects/demo/docker-compose.yml -f projects/demo/docker-compose-kafka.yml up -d
+
+startDemo:
+	docker compose -p fullstack -f projects/demo/docker-compose.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose.yml -f projects/demo/docker-compose-kafka.yml up -d
+
+devDemo:
+	make loadLocalizedImage
+	make LoadLocalizedImageNpm
+	make startDemo
+
+stopDemo:
+	docker compose -p fullstack stop 
+
+logDemo: 
+	docker compose -p fullstack logs
+
+destroyDemo:
+	docker compose -p fullstack stop 
+	docker compose -p fullstack down -v --remove-orphans
+	docker system prune -a --volumes -f
