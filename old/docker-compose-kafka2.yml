@@ -11,9 +11,12 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
+    # volumes:
+    #   - ./kafka/zookeeper/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      # KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
     # logging:
     #   driver: none
     healthcheck:
@@ -44,46 +47,33 @@ services:
     - "9093"
     environment:
       KAFKA_JMX_PORT: 9997
-
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,OUTSIDE://localhost:9092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9093
+      SERVER_CONFLUENT_SUPPORT_METRICS_ENABLE: true
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "http://schema_registry:8081"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_JMX_HOSTNAME: kafka
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema_registry:8081
-      # CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
-      # CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      # CONFLUENT_METRICS_ENABLE: 'true'
-      # CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092,SASL_PLAINTEXT://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093
+      ZOOKEEPER_SASL_ENABLED: "FALSE"
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    # volumes:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: OAUTHBEARER
+      KAFKA_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
+      KAFKA_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/certs
+      KAFKA_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/token
+      KAFKA_sasl_oauthbearer_expected_audience: account
+    volumes:
+      - ./kafka/broker/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+      # - ./kafka/config/server.properties:/etc/kafka/server.properties
     # logging:
     #   driver: none
     networks:
       - fullstack_net
-
-      #   KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9093,OUTSIDE://localhost:9092
-      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
-      # KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-      # CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9093
-      # # workaround if we change to a custom name the schema_registry fails to start
-      # KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      # KAFKA_BROKER_ID: 1
-      # KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      # # KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      # CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
-      # CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      # CONFLUENT_METRICS_ENABLE: 'true'
 
   schema_registry:
     image: confluentinc/cp-schema-registry
@@ -100,11 +90,19 @@ services:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema_registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:9093'
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181 
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8081'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://kafka:9093'
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: OAUTHBEARER
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+        clientSecret=\"bXy0IGRaKftAXraRDBtgj8pyWzib9AFB\" \
+        clientId=\"kafka_schema_registry\";"
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/certs
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/token
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_oauthbearer_expected_audience: account
     # logging:
     #   driver: none
     networks:
@@ -132,8 +130,19 @@ services:
     volumes:
       - ./kafka/plugins:/tmp/connect-plugins
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'kafka:9093'
+      CONNECT_SASL_MECHANISM: OAUTHBEARER
+      CONNECT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+        clientSecret=\"wMpzarS7HGeWBTcUhnfuiXaHDILCfRrH\" \
+        clientId=\"kafka_connect\";"
+      CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONNECT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
+      CONNECT_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      CONNECT_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/certs
+      CONNECT_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/token
+      CONNECT_sasl_oauthbearer_expected_audience: account
+      CONNECT_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://kafka:9093'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
@@ -142,43 +151,15 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      # CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      # CLASSPATH required due to CC-2422
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.3.0.jar
-      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components,/tmp/connect-plugins"
-      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
-
-      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      CONNECT_REST_PORT: 8083
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-
-        #     CONNECT_BOOTSTRAP_SERVERS: 'broker:9093'
-  #     CONNECT_REST_ADVERTISED_HOST_NAME: connect
-  #     CONNECT_REST_PORT: 8083
-  #     CONNECT_GROUP_ID: compose-connect-group
-  #     CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-  #     CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-  #     CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
-  #     CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
+      CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
     # command:
     #  - bash
     #  - -c

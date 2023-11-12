@@ -1,0 +1,14 @@
+auth:
+  type: OAUTH2
+  oauth2:
+    client:
+      keycloak:
+        clientId: kafka_control_center
+        clientSecret: BxGaTSzcxwtpQYmIHEvgbMeQhoFtMHXx
+        scope: openid
+        issuer-uri: https://keycloak:8080/auth/realms/kafka
+        user-name-attribute: account
+        client-name: keycloak
+        provider: keycloak
+        custom-params:
+          type: keycloak

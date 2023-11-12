@@ -11,4 +11,7 @@ exportKeycloakRealmMoveToImport:
 	sudo docker cp keycloak:/tmp/export/$(realm).json keycloak/realms/import/$(filepath)
 
 importKeycloakRealm:
-	docker exec -e QUARKUS_HTTP_HOST_ENABLED=false -it keycloak opt/keycloak/bin/kc.sh import --file $(filepath)
+	docker exec -e QUARKUS_HTTP_HOST_ENABLED=false -it keycloak opt/keycloak/bin/kc.sh import --file $(filepath) --override true 
+
+keyCloakStart: 
+	docker exec -e QUARKUS_HTTP_HOST_ENABLED=false -it keycloak opt/keycloak/bin/kc.sh start-dev

@@ -1,0 +1,32 @@
+version: "3.8"
+services: 
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui
+    ports:
+      - 8084:8080
+    # depends_on:
+    #   - kafka0
+    #   - kafka1
+    #   - schemaregistry0
+    #   - schemaregistry1
+    #   - kafka-connect0
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema_registry:8081
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://connect:8083
+
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      # SPRING_CONFIG_ADDITIONAL-LOCATION: /config.yml
+    # volumes:
+    #   - /kafka/kafka-ui/config.yml:/config.yml
+    networks:
+      - fullstack_net
+
+networks:
+  fullstack_net:
+    driver: bridge

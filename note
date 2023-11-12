@@ -59,3 +59,23 @@ Gestion des script cron/ triggered on events.
 (CSS/style global managment)
 
 Dev for angular and nestjs as close as prod
+
+
+
+
+CREATE (charlie:TestSource:Actor {name: 'Charlie Sheen', timestamp: 1699763038}), (oliver:TestSource:Director {name: 'Oliver Stone', timestamp: 1699763038})
+
+
+
+
+docker exec -ti kafka /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
+
+
+
+docker compose exec broker bash -c "kafka-topics --list --bootstrap-server localhost:9092"
+
+
+
+docker exec -ti kafka /bin/bash
+
+kafka-topics --list --bootstrap-server localhost:9092
