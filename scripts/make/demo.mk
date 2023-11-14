@@ -117,20 +117,17 @@ redeployDemo:
 	cp docker-compose-keycloak.yml projects/demo/docker-compose-keycloak.yml
 	cp docker-compose-neo4j.yml projects/demo/docker-compose-neo4j.yml
 	cp docker-compose-kafka-ui.yml projects/demo/docker-compose-kafka-ui.yml
-#	make getRepos
-	make copySavedRepos
+	make getRepos
 	make moveEnvs
 	make moveDumps
 	make loadLocalizedImage
-#	make LoadLocalizedImageNpm
+	make LoadLocalizedImageNpm
 	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml up -d
 	sleep 20
 	make importKeyCloak
 	make stopDemo
 	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml up -d
-#	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose.yml up -d	
-#	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml -f projects/demo/docker-compose-kafka.yml up -d
-	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml -f projects/demo/docker-compose-kafka.yml -f projects/demo/docker-compose-kafka-ui.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml -f projects/demo/docker-compose-kafka.yml -f projects/demo/docker-compose-kafka-ui.yml -f projects/demo/docker-compose.yml up -d
 	make importNeo4j
 	make logDemo
 

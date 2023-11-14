@@ -57,11 +57,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_HOSTNAME: kafka
       KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema_registry:8081
-      # CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
-      # CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      # CONFLUENT_METRICS_ENABLE: 'true'
-      # CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     # volumes:
@@ -69,21 +64,6 @@ services:
     #   driver: none
     networks:
       - fullstack_net
-
-      #   KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9093,OUTSIDE://localhost:9092
-      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
-      # KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-      # CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9093
-      # # workaround if we change to a custom name the schema_registry fails to start
-      # KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      # KAFKA_BROKER_ID: 1
-      # KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      # # KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      # CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
-      # CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      # CONFLUENT_METRICS_ENABLE: 'true'
 
   schema_registry:
     image: confluentinc/cp-schema-registry
@@ -142,7 +122,6 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      # CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       # CLASSPATH required due to CC-2422
@@ -158,27 +137,6 @@ services:
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-
-        #     CONNECT_BOOTSTRAP_SERVERS: 'broker:9093'
-  #     CONNECT_REST_ADVERTISED_HOST_NAME: connect
-  #     CONNECT_REST_PORT: 8083
-  #     CONNECT_GROUP_ID: compose-connect-group
-  #     CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-  #     CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-  #     CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-  #     CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema_registry:8081'
-  #     CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-  #     CONNECT_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-  #     CONNECT_PLUGIN_PATH: /usr/share/java,/tmp/connect-plugins
-  #     CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=DEBUG,org.I0Itec.zkclient=DEBUG,org.reflections=ERROR
     # command:
     #  - bash
     #  - -c
@@ -194,57 +152,6 @@ services:
     # network_mode: host
     networks:
       - fullstack_net
-
-  # control-center:
-  #   image: confluentinc/cp-enterprise-control-center
-  #   hostname: control-center
-  #   container_name: control-center
-  #   depends_on:
-  #     zookeeper:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_healthy
-  #     # keycloak:
-  #     #   condition: service_healthy
-  #     schema_registry:
-  #       condition: service_healthy
-  #     # connect:
-  #     #   condition: service_healthy
-  #   ports:
-  #     - "9021:9021"
-  #   environment:
-  #     CONTROL_CENTER_STREAMS_SASL_MECHANISM: OAUTHBEARER
-  #     CONTROL_CENTER_STREAMS_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-  #       clientSecret=\"BxGaTSzcxwtpQYmIHEvgbMeQhoFtMHXx\" \
-  #       clientId=\"kafka_control_center\";"
-  #     CONTROL_CENTER_STREAMS_SECURITY_PROTOCOL: SASL_PLAINTEXT
-
-  #     # CONTROL_CENTER_KAFKA_MYCLUSTER_SECURITY_PROTOCOL: SASL_PLAINTEXT
-  #     # CONTROL_CENTER_KAFKA_MYCLUSTER_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-  #     #   clientSecret=\"BxGaTSzcxwtpQYmIHEvgbMeQhoFtMHXx\" \
-  #     #   clientId=\"kafka_control_center\";"
-  #     # CONTROL_CENTER_KAFKA_MYCLUSTER_SASL_MECHANISM: OAUTHBEARER
-      
-  #     CONTROL_CENTER_STREAMS_SASL_LOGIN_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler 
-  #     CONTROL_CENTER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-  #     CONTROL_CENTER_STREAMS_sasl_oauthbearer_jwks_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/certs
-  #     CONTROL_CENTER_STREAMS_sasl_oauthbearer_token_endpoint_url: http://keycloak:8080/realms/kafka/protocol/openid-connect/token
-  #     CONTROL_CENTER_STREAMS_sasl_oauthbearer_expected_audience: account
-  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: 'SASL_PLAINTEXT://kafka:9093'
-  #     CONTROL_CENTER_ZOOKEEPER_CONNECT: 'SASL_PLAINTEXT://zookeeper:2181'
-  #     CONTROL_CENTER_CONNECT_CLUSTER: 'SASL_PLAINTEXT://connect:8083'
-  #     CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'SASL_PLAINTEXT://connect:8083'
-  #     # CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema_registry:8081"
-  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
-  #     CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-  #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-  #     CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-  #     CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
-  #     PORT: 9021
-  #   # logging:
-  #   #   driver: none
-  #   networks:
-  #     - fullstack_net
 
 networks:
   fullstack_net:
