@@ -6,7 +6,7 @@ services:
 # ######################
 
   zookeeper:
-    image: confluentinc/cp-zookeeper
+    image: confluentinc/cp-zookeeper:7.4.3
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -24,7 +24,7 @@ services:
       - fullstack_net
 
   kafka:
-    image: confluentinc/cp-kafka
+    image: confluentinc/cp-kafka:7.4.3
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -66,7 +66,7 @@ services:
       - fullstack_net
 
   schema_registry:
-    image: confluentinc/cp-schema-registry
+    image: confluentinc/cp-schema-registry:7.1.10
     hostname: schema_registry
     container_name: schema_registry
     depends_on:
@@ -95,7 +95,7 @@ services:
       retries: 20
   
   connect:
-    image: confluentinc/cp-kafka-connect
+    image: confluentinc/cp-kafka-connect:7.4.3
     hostname: connect
     container_name: connect
     depends_on:

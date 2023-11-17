@@ -49,14 +49,14 @@ localizeImage:
 	docker save postgres > images/postgres.tar
 	docker pull quay.io/keycloak/keycloak:19.0.1
 	docker save quay.io/keycloak/keycloak:19.0.1 > images/keycloak.19.0.1.tar
-	docker pull confluentinc/cp-zookeeper
-	docker save confluentinc/cp-zookeeper > images/cp-zookeeper.tar
-	docker pull confluentinc/cp-kafka
-	docker save confluentinc/cp-kafka > images/cp-kafka.tar
-	docker pull confluentinc/cp-schema-registry
-	docker save confluentinc/cp-schema-registry > images/cp-schema-registry.tar
-	docker pull confluentinc/cp-kafka-connect
-	docker save confluentinc/cp-kafka-connect > images/cp-kafka-connect.tar
+	docker pull confluentinc/cp-zookeeper:7.4.3
+	docker save confluentinc/cp-zookeeper:7.4.3 > images/cp-zookeeper.tar
+	docker pull confluentinc/cp-kafka:7.4.3
+	docker save confluentinc/cp-kafka:7.4.3 > images/cp-kafka.tar
+	docker pull confluentinc/cp-schema-registry:7.1.10
+	docker save confluentinc/cp-schema-registry:7.1.10 > images/cp-schema-registry.tar
+	docker pull confluentinc/cp-kafka-connect:7.4.3
+	docker save confluentinc/cp-kafka-connect:7.4.3 > images/cp-kafka-connect.tar
 	docker pull neo4j:4.4.8-community
 	docker save neo4j:4.4.8-community > images/neo4j.4.4.8-community.tar
 	docker pull node:16.15.0-alpine
