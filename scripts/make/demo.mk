@@ -57,8 +57,6 @@ localizeImage:
 	docker save confluentinc/cp-schema-registry > images/cp-schema-registry.tar
 	docker pull confluentinc/cp-kafka-connect
 	docker save confluentinc/cp-kafka-connect > images/cp-kafka-connect.tar
-	docker pull confluentinc/cp-enterprise-control-center
-	docker save confluentinc/cp-enterprise-control-center > images/cp-enterprise-control-center.tar
 	docker pull neo4j:4.4.8-community
 	docker save neo4j:4.4.8-community > images/neo4j.4.4.8-community.tar
 	docker pull node:16.15.0-alpine
@@ -74,7 +72,6 @@ loadLocalizedImage:
 	docker load < images/cp-kafka.tar
 	docker load < images/cp-schema-registry.tar
 	docker load < images/cp-kafka-connect.tar
-	docker load < images/cp-enterprise-control-center.tar
 	docker load < images/neo4j.4.4.8-community.tar
 	docker load < images/kafka-ui.tar
 
@@ -92,18 +89,25 @@ deployDemo:
 	cp -R kafka/ projects/demo/kafka/
 	cp docker-compose.yml projects/demo/docker-compose.yml
 	cp docker-compose-kafka.yml projects/demo/docker-compose-kafka.yml
+	cp docker-compose-keycloak.yml projects/demo/docker-compose-keycloak.yml
+	cp docker-compose-neo4j.yml projects/demo/docker-compose-neo4j.yml
 	cp docker-compose-kafka-ui.yml projects/demo/docker-compose-kafka-ui.yml
 	make getRepos
+#	make copySavedRepos
 	make moveEnvs
 	make moveDumps
 	make localizeImage
 	make loadLocalizedImage
-	docker compose -p fullstack -f projects/demo/docker-compose.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml up -d
+	sleep 20
+	make importKeyCloak
+	make stopDemo
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml -f projects/demo/docker-compose-kafka.yml -f projects/demo/docker-compose-kafka-ui.yml -f projects/demo/docker-compose.yml up -d
 	make localizeAfterNpm
-	make importDemo
-	docker compose -p fullstack -f projects/demo/docker-compose.yml -f projects/demo/docker-compose-kafka.yml up -d
-
-
+	make importNeo4j
+	make logDemo
+	
 redeployDemo:
 	sudo rm -rf projects/demo/
 	mkdir -p projects/demo/
@@ -118,6 +122,7 @@ redeployDemo:
 	cp docker-compose-neo4j.yml projects/demo/docker-compose-neo4j.yml
 	cp docker-compose-kafka-ui.yml projects/demo/docker-compose-kafka-ui.yml
 	make getRepos
+#	make copySavedRepos
 	make moveEnvs
 	make moveDumps
 	make loadLocalizedImage
@@ -132,9 +137,17 @@ redeployDemo:
 	make logDemo
 
 startDemo:
-	docker compose -p fullstack -f projects/demo/docker-compose.yml up -d
-	docker compose -p fullstack -f projects/demo/docker-compose.yml -f projects/demo/docker-compose-kafka.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml up -d
+	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml -f projects/demo/docker-compose-neo4j.yml -f projects/demo/docker-compose-kafka.yml -f projects/demo/docker-compose-kafka-ui.yml -f projects/demo/docker-compose.yml up -d
 	make logDemo
+
+reduild-demo-api:
+	docker exec demo-api sh -c "npm install --no-optional && npm cache clean --force"
+
+reduild-demo-frontend: 
+	docker exec demo-frontend sh -c "npm install --no-optional && npm cache clean --force" \
+		&& docker stop demo-frontend \
+		&& docker start demo-frontend
 
 devDemo:
 	make loadLocalizedImage

@@ -77,5 +77,10 @@ docker compose exec broker bash -c "kafka-topics --list --bootstrap-server local
 
 
 docker exec -ti kafka /bin/bash
+docker exec -ti demo-frontend sh
+
 
 kafka-topics --list --bootstrap-server localhost:9092
+
+
+killall

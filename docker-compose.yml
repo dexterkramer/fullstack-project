@@ -17,6 +17,7 @@ services:
       - "./apis/${API_PATH}/tsconfig.json:/opt/app/tsconfig.json"
       - "./apis/${API_PATH}/tsconfig.build.json:/opt/app/tsconfig.build.json"
       - "./apis/${API_PATH}/.env:/opt/app/.env"
+      - "./apis/${API_PATH}/package.json:/opt/app/package.json"
     command: ./node_modules/.bin/nest start --watch
     environment: 
       NODE_ENV: ${NODE_ENV}
@@ -47,6 +48,7 @@ services:
       - "./clients/${CLIENT_PATH}/tsconfig.app.json:/opt/app/tsconfig.app.json"
       - "./clients/${CLIENT_PATH}/tsconfig.spec.json:/opt/app/tsconfig.spec.json"
       - "./clients/${CLIENT_PATH}/tsconfig.json:/opt/app/tsconfig.json"
+      - "./clients/${CLIENT_PATH}/package.json:/opt/app/package.json"
     command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0 --poll 2000"
     ports:
       - 4200:4200
