@@ -63,6 +63,10 @@ localizeImage:
 	docker save node:16.15.0-alpine > images/node.16.15.0-alpine.tar
 	docker pull provectuslabs/kafka-ui
 	docker save provectuslabs/kafka-ui > images/kafka-ui.tar
+	docker pull fcrepo/fcrepo:6.5.0-SNAPSHOT
+	docker save fcrepo/fcrepo:6.5.0-SNAPSHOT > images/fcrepo.tar
+	docker pull djfarrelly/maildev:1.1.0
+	docker save djfarrelly/maildev:1.1.0 > images/maildev.tar
 
 # docker load < images/node.16.15.0-alpine.tar
 loadLocalizedImage: 
@@ -74,6 +78,8 @@ loadLocalizedImage:
 	docker load < images/cp-kafka-connect.tar
 	docker load < images/neo4j.4.4.8-community.tar
 	docker load < images/kafka-ui.tar
+	docker load < images/fcrepo.tar
+	docker load < images/maildev.tar
 
 LoadLocalizedImageNpm: 
 	docker load < images/my_api.tar
@@ -85,6 +91,7 @@ deployDemo:
 	mkdir -p projects/demo/apis/
 	mkdir -p projects/demo/clients/
 	mkdir -p projects/demo/datas/
+	mkdir -p projects/demo/fcrepo/
 	cp -R keycloak/ projects/demo/keycloak/
 	cp -R kafka/ projects/demo/kafka/
 	cp docker-compose.yml projects/demo/docker-compose.yml
@@ -121,12 +128,12 @@ redeployDemo:
 	cp docker-compose-keycloak.yml projects/demo/docker-compose-keycloak.yml
 	cp docker-compose-neo4j.yml projects/demo/docker-compose-neo4j.yml
 	cp docker-compose-kafka-ui.yml projects/demo/docker-compose-kafka-ui.yml
-	make getRepos
-#	make copySavedRepos
+#	make getRepos
+	make copySavedRepos
 	make moveEnvs
 	make moveDumps
 	make loadLocalizedImage
-	make LoadLocalizedImageNpm
+#	make LoadLocalizedImageNpm
 	docker compose -p fullstack -f projects/demo/docker-compose-keycloak.yml up -d
 	sleep 20
 	make importKeyCloak

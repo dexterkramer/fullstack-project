@@ -55,6 +55,26 @@ services:
       # debugging port
       - 49153:49153
 
+  mailer:
+    image: djfarrelly/maildev:1.1.0
+    ports:
+      - 1080:80
+    networks:
+      - fullstack_net
+
+  fcrepo:
+    container_name: fcrepo
+    image: fcrepo/fcrepo:6.5.0-SNAPSHOT
+    networks:
+      - fullstack_net
+    ports:
+      - 8085:8080
+    volumes:
+      - "./fcrepo/data:/var/lib/fcrepo"
+    environment:
+      FEDORA_ADMIN_USERNAME: fedoraAdmin
+      FEDORA_ADMIN_PASSWORD: fedoraAdmin
+
 networks:
   fullstack_net:
     driver: bridge
